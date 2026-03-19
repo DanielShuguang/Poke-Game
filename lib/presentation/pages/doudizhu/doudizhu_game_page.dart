@@ -78,9 +78,42 @@ class _DoudizhuGamePageState extends ConsumerState<DoudizhuGamePage> {
         }
       },
       child: Scaffold(
-        body: state.isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _buildGameBody(context, state, notifier),
+        body: Stack(
+          children: [
+            // 主内容
+            Positioned.fill(
+              child: state.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _buildGameBody(context, state, notifier),
+            ),
+            // 退出按钮（右上角）
+            Positioned(
+              top: 8,
+              right: 8,
+              child: SafeArea(
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _showExitDialog(context),
+                    borderRadius: BorderRadius.circular(24),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: const Icon(
+                        Icons.exit_to_app,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
