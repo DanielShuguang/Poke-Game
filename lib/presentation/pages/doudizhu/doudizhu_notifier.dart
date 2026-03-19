@@ -53,7 +53,7 @@ class HumanPlayer implements Player {
 /// 斗地主状态管理器
 class DoudizhuNotifier extends StateNotifier<DoudizhuUiState> {
   final DealCardsUseCase _dealCardsUseCase;
-  final CallLandlordUseCase _callLandlordUseCase;
+  late CallLandlordUseCase _callLandlordUseCase;
   final PlayCardsUseCase _playCardsUseCase;
   final CheckWinnerUseCase _checkWinnerUseCase;
   final CardValidator _validator;
@@ -73,18 +73,25 @@ class DoudizhuNotifier extends StateNotifier<DoudizhuUiState> {
     CardValidator? validator,
     GameConfig? config,
   })  : _dealCardsUseCase = dealCardsUseCase ?? DealCardsUseCase(),
-        _callLandlordUseCase = callLandlordUseCase ?? CallLandlordUseCase(),
         _playCardsUseCase = playCardsUseCase ?? PlayCardsUseCase(),
         _checkWinnerUseCase = checkWinnerUseCase ?? CheckWinnerUseCase(),
         _validator = validator ?? const CardValidator(),
         _config = config ?? GameConfig.defaultConfig,
-        super(DoudizhuUiState.initial());
+        super(DoudizhuUiState.initial()) {
+    _callLandlordUseCase = callLandlordUseCase ??
+        CallLandlordUseCase(isHumanVsAi: _config.isHumanVsAi);
+  }
 
   /// 开始游戏
   Future<void> startGame() async {
     // 防止重复调用
     if (state.isLoading) return;
 
+    await _dealAndStartGame();
+  }
+
+  /// 发牌并开始游戏（内部方法）
+  Future<void> _dealAndStartGame() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
@@ -105,7 +112,8 @@ class DoudizhuNotifier extends StateNotifier<DoudizhuUiState> {
       );
 
       // 如果第一个叫地主的是AI，自动处理
-      if (gameState.currentPlayer is AiPlayer) {
+      final callingIndex = gameState.callingPlayerIndex ?? 0;
+      if (gameState.players[callingIndex] is AiPlayer) {
         await _handleAiCall();
       }
     } catch (e) {
@@ -131,15 +139,19 @@ class DoudizhuNotifier extends StateNotifier<DoudizhuUiState> {
     }
 
     try {
-      final newGameState = _callLandlordUseCase(
+      final result = _callLandlordUseCase(
         state.gameState,
         humanPlayerId,
         call,
       );
 
+      final newGameState = result.gameState;
       state = state.copyWith(
         gameState: newGameState,
         clearHintCards: true,
+        // 非人机模式下，全部不叫时显示提示消息
+        infoMessage: result.allPassed ? '全部不叫，重新发牌' : null,
+        clearInfoMessage: !result.allPassed,
       );
 
       // 检查是否进入出牌阶段
@@ -149,9 +161,14 @@ class DoudizhuNotifier extends StateNotifier<DoudizhuUiState> {
         if (landlord is AiPlayer) {
           await _handleAiPlay();
         }
+      } else if (newGameState.phase == GamePhase.waiting) {
+        // 全部不叫，重新发牌（延迟一下让用户看到提示）
+        await Future.delayed(const Duration(milliseconds: 1500));
+        await _dealAndStartGame();
       } else if (newGameState.phase == GamePhase.calling) {
         // 继续下一个玩家叫地主
-        final nextPlayer = newGameState.players[newGameState.currentPlayerIndex];
+        final nextCallingIndex = newGameState.callingPlayerIndex ?? 0;
+        final nextPlayer = newGameState.players[nextCallingIndex];
         if (nextPlayer is AiPlayer) {
           await _handleAiCall();
         }
@@ -719,16 +736,23 @@ class DoudizhuNotifier extends StateNotifier<DoudizhuUiState> {
 
   /// 处理AI叫地主
   Future<void> _handleAiCall() async {
-    final currentPlayer = state.gameState.currentPlayer as AiPlayer;
+    final callingIndex = state.gameState.callingPlayerIndex ?? 0;
+    final currentPlayer = state.gameState.players[callingIndex] as AiPlayer;
     final decision = await currentPlayer.decideCall();
 
-    final newGameState = _callLandlordUseCase(
+    final result = _callLandlordUseCase(
       state.gameState,
       currentPlayer.id,
       decision.shouldCall,
     );
 
-    state = state.copyWith(gameState: newGameState);
+    final newGameState = result.gameState;
+    state = state.copyWith(
+      gameState: newGameState,
+      // 非人机模式下，全部不叫时显示提示消息
+      infoMessage: result.allPassed ? '全部不叫，重新发牌' : null,
+      clearInfoMessage: !result.allPassed,
+    );
 
     if (newGameState.phase == GamePhase.playing) {
       // 进入出牌阶段
@@ -736,9 +760,14 @@ class DoudizhuNotifier extends StateNotifier<DoudizhuUiState> {
       if (landlord is AiPlayer) {
         await _handleAiPlay();
       }
+    } else if (newGameState.phase == GamePhase.waiting) {
+      // 全部不叫，重新发牌（延迟一下让用户看到提示）
+      await Future.delayed(const Duration(milliseconds: 1500));
+      await _dealAndStartGame();
     } else if (newGameState.phase == GamePhase.calling) {
       // 继续下一个玩家
-      final nextPlayer = newGameState.players[newGameState.currentPlayerIndex];
+      final nextCallingIndex = newGameState.callingPlayerIndex ?? 0;
+      final nextPlayer = newGameState.players[nextCallingIndex];
       if (nextPlayer is AiPlayer) {
         await _handleAiCall();
       }

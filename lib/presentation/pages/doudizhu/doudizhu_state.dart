@@ -22,6 +22,9 @@ class DoudizhuUiState {
   /// 提示的牌（用于高亮显示）
   final Set<Card>? hintCards;
 
+  /// 非阻塞性提示消息（如：全部不叫，重新发牌）
+  final String? infoMessage;
+
   const DoudizhuUiState({
     required this.gameState,
     this.selectedCards = const {},
@@ -29,6 +32,7 @@ class DoudizhuUiState {
     this.errorMessage,
     this.winners,
     this.hintCards,
+    this.infoMessage,
   });
 
   /// 初始状态
@@ -45,6 +49,8 @@ class DoudizhuUiState {
     List<String>? winners,
     Set<Card>? hintCards,
     bool clearHintCards = false,
+    String? infoMessage,
+    bool clearInfoMessage = false,
   }) {
     return DoudizhuUiState(
       gameState: gameState ?? this.gameState,
@@ -53,6 +59,7 @@ class DoudizhuUiState {
       errorMessage: errorMessage,
       winners: winners,
       hintCards: clearHintCards ? null : (hintCards ?? this.hintCards),
+      infoMessage: clearInfoMessage ? null : (infoMessage ?? this.infoMessage),
     );
   }
 

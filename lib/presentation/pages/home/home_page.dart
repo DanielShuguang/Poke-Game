@@ -19,9 +19,7 @@ class HomePage extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              // TODO: 设置页面
-            },
+            onPressed: () => context.push('/settings'),
           ),
         ],
       ),

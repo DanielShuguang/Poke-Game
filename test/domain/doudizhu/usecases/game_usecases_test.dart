@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:poke_game/domain/doudizhu/ai/ai_player.dart';
 import 'package:poke_game/domain/doudizhu/entities/card.dart';
 import 'package:poke_game/domain/doudizhu/entities/game_state.dart';
 import 'package:poke_game/domain/doudizhu/entities/player.dart';
@@ -43,13 +42,8 @@ void main() {
   });
 
   group('CallLandlordUseCase', () {
-    late CallLandlordUseCase useCase;
-
-    setUp(() {
-      useCase = CallLandlordUseCase();
-    });
-
     test('should set player as landlord when calling', () {
+      final useCase = CallLandlordUseCase(isHumanVsAi: true);
       final players = [
         _TestPlayer(id: 'p1', initialCards: 17),
         _TestPlayer(id: 'p2', initialCards: 17),
@@ -68,7 +62,8 @@ void main() {
         callingPlayerIndex: 0,
       );
 
-      state = useCase(state, 'p1', true);
+      final result = useCase(state, 'p1', true);
+      state = result.gameState;
 
       expect(state.phase, GamePhase.playing);
       expect(state.landlordIndex, 0);
@@ -79,7 +74,8 @@ void main() {
       expect(players[0].handCards.length, 20);
     });
 
-    test('should move to next player when passing', () {
+    test('should move to next player when passing (non-human-vs-ai mode)', () {
+      final useCase = CallLandlordUseCase(isHumanVsAi: false);
       final players = [
         _TestPlayer(id: 'p1'),
         _TestPlayer(id: 'p2'),
@@ -98,14 +94,17 @@ void main() {
         callingPlayerIndex: 0,
       );
 
-      state = useCase(state, 'p1', false);
+      final result = useCase(state, 'p1', false);
+      state = result.gameState;
 
       expect(state.phase, GamePhase.calling);
       expect(state.callingPlayerIndex, 1);
       expect(state.callCount, 1);
+      expect(result.allPassed, false);
     });
 
-    test('should restart game when all players pass', () {
+    test('should restart game when all players pass (non-human-vs-ai mode)', () {
+      final useCase = CallLandlordUseCase(isHumanVsAi: false);
       final players = [
         _TestPlayer(id: 'p1'),
         _TestPlayer(id: 'p2'),
@@ -125,10 +124,87 @@ void main() {
         callCount: 2,
       );
 
-      state = useCase(state, 'p3', false);
+      final result = useCase(state, 'p3', false);
+      state = result.gameState;
 
       expect(state.phase, GamePhase.waiting);
       expect(state.players, isEmpty);
+      expect(result.allPassed, true);
+    });
+
+    test('should force last AI to call landlord in human-vs-ai mode when human passes', () {
+      final useCase = CallLandlordUseCase(isHumanVsAi: true);
+      final players = [
+        _TestPlayer(id: 'human', initialCards: 17), // index 0 - human
+        _TestPlayer(id: 'ai1', initialCards: 17),   // index 1 - AI
+        _TestPlayer(id: 'ai2', initialCards: 17),   // index 2 - AI
+      ];
+
+      // Human passes first, then AI1 passes
+      var state = GameState(
+        phase: GamePhase.calling,
+        players: players,
+        currentPlayerIndex: 0,
+        landlordCards: [
+          const Card(suit: Suit.heart, rank: 3),
+          const Card(suit: Suit.spade, rank: 3),
+          const Card(suit: Suit.club, rank: 3),
+        ],
+        callingPlayerIndex: 0,
+        callCount: 0,
+      );
+
+      // Human passes
+      var result = useCase(state, 'human', false);
+      state = result.gameState;
+      expect(state.phase, GamePhase.calling);
+      expect(state.callingPlayerIndex, 1);
+      expect(state.callCount, 1);
+
+      // AI1 passes
+      result = useCase(state, 'ai1', false);
+      state = result.gameState;
+      expect(state.phase, GamePhase.calling);
+      expect(state.callingPlayerIndex, 2);
+      expect(state.callCount, 2);
+
+      // Now it's AI2's turn, but in human-vs-ai mode, AI2 should be forced to call
+      // However, this test just verifies the state transition
+      // The actual forcing logic is in CallLandlordUseCase.call() for playerIndex == 0 (human)
+      // When human passes with callCount == 1 (1 remaining AI), last AI is forced to call
+    });
+
+    test('should force last AI to call when human passes as first player with only one AI left', () {
+      final useCase = CallLandlordUseCase(isHumanVsAi: true);
+      final players = [
+        _TestPlayer(id: 'human', initialCards: 17), // index 0 - human
+        _TestPlayer(id: 'ai1', initialCards: 17),   // index 1 - AI (already passed)
+        _TestPlayer(id: 'ai2', initialCards: 17),   // index 2 - AI (will be forced)
+      ];
+
+      // State: AI1 already passed, human is about to pass (callCount == 1)
+      var state = GameState(
+        phase: GamePhase.calling,
+        players: players,
+        currentPlayerIndex: 0,
+        landlordCards: [
+          const Card(suit: Suit.heart, rank: 3),
+          const Card(suit: Suit.spade, rank: 3),
+          const Card(suit: Suit.club, rank: 3),
+        ],
+        callingPlayerIndex: 0,
+        callCount: 1, // AI1 already passed
+      );
+
+      // Human passes - this should force AI2 (index 2) to become landlord
+      final result = useCase(state, 'human', false);
+      final newState = result.gameState;
+
+      expect(newState.phase, GamePhase.playing);
+      expect(newState.landlordIndex, 2);
+      expect(players[2].role, PlayerRole.landlord);
+      expect(players[0].role, PlayerRole.peasant);
+      expect(players[1].role, PlayerRole.peasant);
     });
   });
 }

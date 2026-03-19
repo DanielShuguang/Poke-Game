@@ -57,7 +57,7 @@ class _DoudizhuGamePageState extends ConsumerState<DoudizhuGamePage> {
     final state = ref.watch(doudizhuProvider);
     final notifier = ref.read(doudizhuProvider.notifier);
 
-    // 监听错误
+    // 监听错误和提示消息
     ref.listen<DoudizhuUiState>(doudizhuProvider, (previous, next) {
       if (next.errorMessage != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -67,6 +67,15 @@ class _DoudizhuGamePageState extends ConsumerState<DoudizhuGamePage> {
           ),
         );
         notifier.clearError();
+      }
+      if (next.infoMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.infoMessage!),
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     });
 
