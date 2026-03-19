@@ -35,8 +35,8 @@ class LandlordCardsWidget extends StatelessWidget {
               child: CardWidget(
                 card: card,
                 faceUp: revealed,
-                width: 32,
-                height: 44,
+                width: 36,
+                height: 50,
               ),
             );
           }),

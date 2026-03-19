@@ -122,7 +122,7 @@ class _CenterPlayAreaWidgetState extends State<CenterPlayAreaWidget>
                       );
                     },
                     child: SizedBox(
-                      width: 36,
+                      width: 44,
                       child: CardWidget(
                         card: card,
                         isSelected: false,

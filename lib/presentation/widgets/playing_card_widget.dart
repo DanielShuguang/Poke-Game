@@ -10,6 +10,7 @@ class CardWidget extends StatefulWidget {
   final double? width;
   final double? height;
   final bool isHint; // 是否是提示的牌
+  final bool isPreview; // 是否是拖拽预览选中的牌
 
   const CardWidget({
     super.key,
@@ -20,6 +21,7 @@ class CardWidget extends StatefulWidget {
     this.width,
     this.height,
     this.isHint = false,
+    this.isPreview = false,
   });
 
   @override
@@ -62,6 +64,39 @@ class _CardWidgetState extends State<CardWidget>
 
   @override
   Widget build(BuildContext context) {
+    // 确定边框颜色
+    Color borderColor;
+    double borderWidth;
+    Color shadowColor;
+    double blurRadius;
+    double shadowOffset;
+
+    if (widget.isSelected) {
+      borderColor = Colors.green;
+      borderWidth = 2;
+      shadowColor = Colors.green.withValues(alpha: 0.4);
+      blurRadius = 8;
+      shadowOffset = 4;
+    } else if (widget.isPreview) {
+      borderColor = Colors.blue;
+      borderWidth = 2;
+      shadowColor = Colors.blue.withValues(alpha: 0.3);
+      blurRadius = 8;
+      shadowOffset = 2;
+    } else if (widget.isHint) {
+      borderColor = Colors.amber;
+      borderWidth = 2;
+      shadowColor = Colors.amber.withValues(alpha: 0.3);
+      blurRadius = 8;
+      shadowOffset = 2;
+    } else {
+      borderColor = Colors.grey.shade300;
+      borderWidth = 1;
+      shadowColor = Colors.black.withValues(alpha: 0.1);
+      blurRadius = 4;
+      shadowOffset = 2;
+    }
+
     Widget cardContent = GestureDetector(
       onTap: widget.onTap,
       child: AnimatedContainer(
@@ -74,26 +109,20 @@ class _CardWidgetState extends State<CardWidget>
           duration: const Duration(milliseconds: 150),
           scale: widget.isSelected ? 1.05 : 1.0,
           child: Container(
-            width: widget.width ?? 40,
-            height: widget.height ?? 56,
+            width: widget.width ?? 48,
+            height: widget.height ?? 68,
             decoration: BoxDecoration(
               color: widget.faceUp ? Colors.white : Colors.blue.shade700,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(
-                color: widget.isSelected
-                    ? Colors.green
-                    : (widget.isHint ? Colors.amber : Colors.grey.shade300),
-                width: widget.isSelected || widget.isHint ? 2 : 1,
+                color: borderColor,
+                width: borderWidth,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: widget.isSelected
-                      ? Colors.green.withValues(alpha: 0.4)
-                      : (widget.isHint
-                          ? Colors.amber.withValues(alpha: 0.3)
-                          : Colors.black.withValues(alpha: 0.1)),
-                  blurRadius: widget.isSelected || widget.isHint ? 8 : 4,
-                  offset: Offset(0, widget.isSelected ? 4 : 2),
+                  color: shadowColor,
+                  blurRadius: blurRadius,
+                  offset: Offset(0, shadowOffset),
                 ),
               ],
             ),
@@ -122,9 +151,9 @@ class _CardWidgetState extends State<CardWidget>
 
   Widget _buildCardFace() {
     // 根据卡片大小调整字体
-    final isSmall = (widget.width ?? 40) < 36;
-    final suitSize = isSmall ? 14.0 : 18.0;
-    final textSize = isSmall ? 11.0 : 14.0;
+    final isSmall = (widget.width ?? 48) < 40;
+    final suitSize = isSmall ? 14.0 : 22.0;
+    final textSize = isSmall ? 11.0 : 16.0;
 
     return Center(
       child: Column(

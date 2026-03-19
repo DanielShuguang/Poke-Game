@@ -62,6 +62,9 @@ class DoudizhuNotifier extends StateNotifier<DoudizhuUiState> {
   /// 人类玩家ID（固定为第一个玩家）
   static const String humanPlayerId = 'human';
 
+  /// 暴露验证器供外部使用
+  CardValidator get validator => _validator;
+
   DoudizhuNotifier({
     DealCardsUseCase? dealCardsUseCase,
     CallLandlordUseCase? callLandlordUseCase,
@@ -272,6 +275,33 @@ class DoudizhuNotifier extends StateNotifier<DoudizhuUiState> {
       newSelection.add(card);
     }
     state = state.copyWith(selectedCards: newSelection, clearHintCards: true);
+  }
+
+  /// 拖拽选牌 - 从划过的牌中智能选择最优牌型
+  void selectCardsByDrag(List<Card> draggedCards) {
+    if (draggedCards.isEmpty) return;
+
+    final lastPlayedCards = state.gameState.lastPlayedCards;
+
+    List<Card>? selectedCards;
+
+    if (lastPlayedCards == null) {
+      // 先手情况：找出最大牌型
+      selectedCards = _validator.findBestCombination(draggedCards);
+    } else {
+      // 非先手情况：找出能打过上家的最小牌型
+      selectedCards = _validator.findMinBeatingCombination(draggedCards, lastPlayedCards);
+    }
+
+    if (selectedCards != null && selectedCards.isNotEmpty) {
+      state = state.copyWith(
+        selectedCards: selectedCards.toSet(),
+        clearHintCards: true,
+      );
+    } else {
+      // 无法组成有效牌型，清空选择
+      state = state.copyWith(selectedCards: {}, clearHintCards: true);
+    }
   }
 
   /// 提示可出的牌
