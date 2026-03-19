@@ -240,7 +240,6 @@ class _TestPlayer implements Player {
     required this.id,
     String? name,
     List<Card>? initialCards,
-    this.role,
   })  : name = name ?? 'Test',
         handCards = initialCards ?? [];
 

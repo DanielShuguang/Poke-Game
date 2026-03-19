@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:poke_game/domain/doudizhu/ai/ai_player.dart';
 import 'package:poke_game/domain/doudizhu/ai/strategies/call_strategy.dart';
 import 'package:poke_game/domain/doudizhu/entities/card.dart';
-import 'package:poke_game/domain/doudizhu/entities/player.dart';
 
 void main() {
   group('SimpleCallStrategy', () {
