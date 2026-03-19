@@ -1,0 +1,42 @@
+schema: spec-driven
+
+# 项目上下文（可选）
+# 在创建工件时向 AI 显示此信息。
+# 添加您的技术栈、约定、风格指南、领域知识等。
+# 示例：
+#   context: |
+#     技术栈：TypeScript, React, Node.js
+#     我们使用约定式提交
+#     领域：电商平台
+context: |
+  技术栈：Flutter 3.x, Dart SDK ^3.6.1
+  UI框架：Material Design 3 (Material You)
+  目标平台：Android, iOS, Web, Windows, macOS, Linux
+  架构模式：推荐使用 Clean Architecture 或 MVVM
+  状态管理：可根据需求选择 Provider、Riverpod、Bloc 等
+  领域：扑克游戏合集移动应用
+  游戏类型：包含但不限于德州扑克、21点、斗地主、炸金花等经典扑克游戏
+  核心功能：游戏房间、多人对战、AI对手、积分系统、排行榜
+
+# 每个工件的规则（可选）
+# 为特定工件添加自定义规则。
+# 示例：
+#   rules:
+#     proposal:
+#       - 保持提案在500字以内
+#       - 始终包含"非目标"部分
+#     tasks:
+#       - 将任务分解为最多2小时的块
+rules:
+  proposal:
+    - 提案应明确游戏规则和交互流程
+    - 包含UI/UX设计要点
+    - 考虑多人游戏的网络同步方案
+  tasks:
+    - 每个任务应可独立测试
+    - 优先实现核心游戏逻辑
+    - UI实现应考虑多平台适配
+  spec:
+    - 明确卡牌数据结构
+    - 定义游戏状态机
+    - 说明动画和交互细节
