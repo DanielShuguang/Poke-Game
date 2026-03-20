@@ -64,6 +64,13 @@ dependencies:
   # 序列化
   json_annotation: ^4.9.0
 
+  # 网络通信 (局域网多人游戏)
+  web_socket_channel: ^3.0.1
+  shelf: ^1.4.2
+  shelf_web_socket: ^3.0.0
+  nsd: ^4.0.4
+  multicast_dns: ^0.3.2+4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

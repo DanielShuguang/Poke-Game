@@ -1,9 +1,7 @@
-# doudizhu-game 规范
+# 斗地主游戏规范（增量）
 
-## 目的
-定义斗地主游戏的核心业务规则，支持单机模式和局域网多人模式。
+## 修改需求
 
-## 需求
 ### Requirement: Initialize game with AI opponents
 
 The system SHALL initialize a new game session with 2 AI opponents in single-player mode, or with human players in LAN multiplayer mode.
@@ -112,60 +110,6 @@ The system SHALL display cards in the player's hand with interactive selection. 
 
 ---
 
-### Requirement: Validate card combinations
-
-The system SHALL validate played card combinations according to Doudizhu rules.
-
-#### Scenario: Valid single card
-
-- **WHEN** user selects one card and plays
-- **THEN** system accepts the play if it beats the previous play
-
-#### Scenario: Valid pair
-
-- **WHEN** user selects two cards of the same rank and plays
-- **THEN** system accepts the play as a pair
-
-#### Scenario: Valid triple
-
-- **WHEN** user selects three cards of the same rank and plays
-- **THEN** system accepts the play as a triple
-
-#### Scenario: Valid triple with single
-
-- **WHEN** user selects three cards of same rank plus one single card and plays
-- **THEN** system accepts the play as "三带一"
-
-#### Scenario: Valid triple with pair
-
-- **WHEN** user selects three cards of same rank plus one pair and plays
-- **THEN** system accepts the play as "三带二"
-
-#### Scenario: Valid straight
-
-- **WHEN** user selects 5+ consecutive cards (min rank 3) and plays
-- **THEN** system accepts the play as a straight (顺子)
-
-#### Scenario: Valid bomb
-
-- **WHEN** user selects four cards of the same rank and plays
-- **THEN** system accepts the play as a bomb (炸弹)
-- **AND** bomb beats any non-bomb combination
-
-#### Scenario: Valid rocket
-
-- **WHEN** user selects both jokers and plays
-- **THEN** system accepts the play as a rocket (王炸)
-- **AND** rocket beats any other combination
-
-#### Scenario: Invalid combination
-
-- **WHEN** user plays an invalid card combination
-- **THEN** system rejects the play
-- **AND** displays an error message
-
----
-
 ### Requirement: Play cards in turn
 
 The system SHALL enforce turn-based gameplay. In LAN mode, the host must validate and broadcast all play actions.
@@ -234,67 +178,7 @@ The system SHALL provide intelligent AI opponents in single-player mode. In LAN 
 
 ---
 
-### Requirement: Determine winner
-
-The system SHALL determine the winner when a player runs out of cards.
-
-#### Scenario: Landlord wins
-
-- **WHEN** landlord plays all cards first
-- **THEN** system declares landlord as winner
-- **AND** displays victory animation
-
-#### Scenario: Peasants win
-
-- **WHEN** any peasant plays all cards first
-- **THEN** system declares both peasants as winners
-- **AND** displays victory animation
-
-#### Scenario: Human player loses
-
-- **WHEN** AI plays all cards first and human is on the losing side
-- **THEN** system displays defeat screen
-- **AND** shows play again option
-
----
-
-### Requirement: End game options
-
-The system SHALL provide options after game ends.
-
-#### Scenario: Play again
-
-- **WHEN** game ends and user taps "再来一局"
-- **THEN** system starts a new game session
-
-#### Scenario: Return to homepage
-
-- **WHEN** game ends and user taps "返回首页"
-- **THEN** system navigates back to homepage
-
----
-
-### Requirement: Display game info
-
-The system SHALL display relevant game information during play.
-
-#### Scenario: Show current turn indicator
-
-- **WHEN** game is in progress
-- **THEN** system highlights the current player's position
-
-#### Scenario: Show landlord indicator
-
-- **WHEN** landlord is determined
-- **THEN** system displays "地主" badge on landlord's avatar
-
-#### Scenario: Show played cards
-
-- **WHEN** any player plays cards
-- **THEN** system displays the played cards in the center area
-- **AND** shows which player played them
-
----
+## ADDED Requirements
 
 ### Requirement: Support Player Interface abstraction
 
@@ -356,21 +240,3 @@ The system MUST handle player disconnections gracefully in LAN multiplayer mode.
 - **THEN** system declares disconnected player as loser
 - **AND** ends the game
 - **AND** notifies remaining players
-
----
-
-### Requirement: Support game mode extensibility
-
-The system SHALL support future extension to LAN multiplayer mode.
-
-#### Scenario: Game mode abstraction
-
-- **WHEN** game session is initialized
-- **THEN** system uses Player interface for all players
-- **AND** AI player and future NetworkPlayer implement same interface
-
-#### Scenario: Event-driven architecture
-
-- **WHEN** any game action occurs (deal, call, play)
-- **THEN** system emits corresponding GameEvent
-- **AND** event processor handles the event uniformly

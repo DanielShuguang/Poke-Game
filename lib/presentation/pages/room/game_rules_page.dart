@@ -1,0 +1,328 @@
+import 'package:flutter/material.dart';
+import 'package:poke_game/domain/game/entities/game_type_config.dart';
+import 'package:poke_game/domain/lan/entities/room_info.dart';
+
+/// 游戏规则页面
+class GameRulesPage extends StatelessWidget {
+  final GameType gameType;
+  final Map<String, dynamic>? currentConfig;
+
+  const GameRulesPage({
+    super.key,
+    required this.gameType,
+    this.currentConfig,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final config = GameTypeRegistry.getConfig(gameType);
+    if (config == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('游戏规则')),
+        body: const Center(child: Text('游戏类型不存在')),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('${config.displayName}规则'),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildGameOverview(context, config),
+            const SizedBox(height: 24),
+            _buildPlayerCountInfo(context, config),
+            const SizedBox(height: 24),
+            if (config.configOptions.isNotEmpty) ...[
+              _buildConfigOptions(context, config),
+              const SizedBox(height: 24),
+            ],
+            _buildRulesDetail(context, gameType),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGameOverview(BuildContext context, GameTypeConfig config) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              config.displayName,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              config.description,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(
+                  Icons.timer_outlined,
+                  size: 16,
+                  color: Colors.grey.shade600,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '预计 ${config.estimatedDuration} 分钟',
+                  style: TextStyle(color: Colors.grey.shade600),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlayerCountInfo(BuildContext context, GameTypeConfig config) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '人数配置',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            if (config.fixedPlayerCount != null)
+              Row(
+                children: [
+                  const Icon(Icons.people, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    '固定 ${config.fixedPlayerCount} 人',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ],
+              )
+            else
+              Row(
+                children: [
+                  const Icon(Icons.people_outline, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${config.minPlayerCount} - ${config.maxPlayerCount} 人',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConfigOptions(BuildContext context, GameTypeConfig config) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '游戏设置',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            ...config.configOptions.map((option) => _buildOptionItem(context, option)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionItem(BuildContext context, GameConfigOption option) {
+    String valueText;
+    if (option.type == GameConfigType.boolean) {
+      valueText = option.defaultValue == true ? '是' : '否';
+    } else if (option.type == GameConfigType.enumeration && option.options != null) {
+      final opt = option.options!.firstWhere(
+        (o) => o.value == option.defaultValue,
+        orElse: () => GameConfigOptionValue(value: option.defaultValue, displayName: '${option.defaultValue}'),
+      );
+      valueText = opt.displayName;
+    } else {
+      valueText = '${option.defaultValue}';
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(option.displayName),
+              if (option.description != null)
+                Text(
+                  option.description!,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey,
+                      ),
+                ),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              valueText,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRulesDetail(BuildContext context, GameType gameType) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '游戏规则',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            _getRulesContent(gameType),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _getRulesContent(GameType gameType) {
+    switch (gameType) {
+      case GameType.doudizhu:
+        return const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('1. 发牌：每人17张，留3张底牌给地主'),
+            SizedBox(height: 8),
+            Text('2. 叫地主：玩家轮流叫地主，叫地主者获得3张底牌'),
+            SizedBox(height: 8),
+            Text('3. 出牌：地主先出，顺时针轮流出牌'),
+            SizedBox(height: 8),
+            Text('4. 牌型：单张、对子、三张、三带一、三带二、顺子、连对、飞机、炸弹、火箭等'),
+            SizedBox(height: 8),
+            Text('5. 胜负：地主先出完牌则地主胜，任一农民先出完则农民胜'),
+          ],
+        );
+      case GameType.texasHoldem:
+        return const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('1. 发牌：每人2张底牌'),
+            SizedBox(height: 8),
+            Text('2. 翻牌：发出3张公共牌'),
+            SizedBox(height: 8),
+            Text('3. 转牌：发出第4张公共牌'),
+            SizedBox(height: 8),
+            Text('4. 河牌：发出第5张公共牌'),
+            SizedBox(height: 8),
+            Text('5. 比牌：用5张最佳牌型比较大小'),
+          ],
+        );
+      case GameType.zhajinhua:
+        return const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('1. 发牌：每人3张牌，牌面朝下'),
+            SizedBox(height: 8),
+            Text('2. 下注：玩家可以选择看牌、跟注、加注或弃牌'),
+            SizedBox(height: 8),
+            Text('3. 比牌：最后剩下的玩家开牌比大小'),
+            SizedBox(height: 8),
+            Text('4. 牌型：豹子 > 同花顺 > 同花 > 顺子 > 对子 > 散牌'),
+          ],
+        );
+    }
+  }
+}
+
+/// 游戏规则对话框
+class GameRulesDialog extends StatelessWidget {
+  final GameType gameType;
+  final Map<String, dynamic>? currentConfig;
+
+  const GameRulesDialog({
+    super.key,
+    required this.gameType,
+    this.currentConfig,
+  });
+
+  static void show(BuildContext context, GameType gameType, {Map<String, dynamic>? currentConfig}) {
+    showDialog(
+      context: context,
+      builder: (context) => GameRulesDialog(
+        gameType: gameType,
+        currentConfig: currentConfig,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final config = GameTypeRegistry.getConfig(gameType);
+    if (config == null) {
+      return AlertDialog(
+        title: const Text('游戏规则'),
+        content: const Text('游戏类型不存在'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('关闭'),
+          ),
+        ],
+      );
+    }
+
+    return AlertDialog(
+      title: Text(config.displayName),
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(config.description),
+            const SizedBox(height: 16),
+            Text('人数: ${config.fixedPlayerCount ?? "${config.minPlayerCount}-${config.maxPlayerCount}"} 人'),
+            const SizedBox(height: 16),
+            if (currentConfig != null && currentConfig!.isNotEmpty) ...[
+              const Text('当前配置:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              ...currentConfig!.entries.map((e) => Text('• ${e.key}: ${e.value}')),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('关闭'),
+        ),
+      ],
+    );
+  }
+}

@@ -45,5 +45,12 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- 局域网多人游戏权限 -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>此应用需要在局域网内发现和连接其他设备进行多人游戏</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_pokegame._tcp</string>
+	</array>
 </dict>
 </plist>
