@@ -2,15 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
+import 'package:poke_game/core/network/holdem_network_adapter.dart';
 import 'package:poke_game/core/network/network_environment_checker.dart';
 import 'package:poke_game/core/network/room_http_server.dart';
 import 'package:poke_game/core/network/room_state_sync_service.dart';
 import 'package:poke_game/core/network/udp_broadcaster.dart';
 import 'package:poke_game/core/network/websocket_client.dart';
 import 'package:poke_game/core/network/websocket_manager.dart';
+import 'package:poke_game/core/network/zhj_network_adapter.dart';
 import 'package:poke_game/domain/lan/entities/player_identity.dart';
 import 'package:poke_game/domain/lan/entities/room.dart';
 import 'package:poke_game/domain/lan/entities/room_info.dart';
+import 'package:poke_game/presentation/pages/texas_holdem/holdem_game_page.dart';
+import 'package:poke_game/presentation/pages/texas_holdem/holdem_provider.dart';
+import 'package:poke_game/presentation/pages/zhajinhua/providers/zhj_game_provider.dart';
+import 'package:poke_game/presentation/pages/zhajinhua/zhajinhua_page.dart';
 
 /// 等待大厅状态
 class LobbyState {
@@ -235,6 +241,27 @@ class LobbyNotifier extends StateNotifier<LobbyState> {
     _logger.i('游戏开始');
   }
 
+  /// Host 广播游戏状态（供 NetworkAdapter 调用）
+  void broadcastGameMessage(Map<String, dynamic> msg) {
+    _webSocketManager?.broadcast(msg);
+  }
+
+  /// Host 游戏消息流（来自客户端）
+  Stream<Map<String, dynamic>> get hostGameStream {
+    if (_webSocketManager == null) return const Stream.empty();
+    return _webSocketManager!.dataStream;
+  }
+
+  /// Client 游戏消息流（来自 Host）
+  Stream<Map<String, dynamic>> get clientGameStream {
+    return _wsClient?.messageStream ?? const Stream.empty();
+  }
+
+  /// Client 发送消息给 Host
+  void sendGameMessage(Map<String, dynamic> msg) {
+    _wsClient?.send(msg);
+  }
+
   void leaveRoom() {
     // 发送离开房间消息
     if (!_isHostMode) {
@@ -293,52 +320,72 @@ class LobbyNotifier extends StateNotifier<LobbyState> {
     _syncService?.dispose();
     _httpServer?.stop();
     _webSocketManager?.dispose();
+    super.dispose();
   }
 }
 
 /// 等待大厅页面
-class RoomLobbyPage extends ConsumerWidget {
+class RoomLobbyPage extends ConsumerStatefulWidget {
   const RoomLobbyPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RoomLobbyPage> createState() => _RoomLobbyPageState();
+}
+
+class _RoomLobbyPageState extends ConsumerState<RoomLobbyPage> {
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(lobbyProvider);
+
+    // 任务 6.1：当 isStarting 变为 true 时根据游戏类型导航
+    ref.listen<LobbyState>(lobbyProvider, (prev, next) {
+      if (prev?.isStarting == false && next.isStarting == true) {
+        _navigateToGame(context, ref, next);
+      }
+    });
+
     final room = state.room;
 
-    // 模拟数据用于展示
-    final mockRoom = room ?? Room(
-      roomId: 'mock-room',
-      roomName: '欢乐对战',
-      gameType: GameType.doudizhu,
-      hostPlayerId: 'player1',
-      players: [
-        PlayerIdentity(
-          playerId: 'player1',
-          playerName: '玩家1（房主）',
-          seatNumber: 1,
-          status: PlayerStatus.ready,
-          isHost: true,
-        ),
-        PlayerIdentity(
-          playerId: 'player2',
-          playerName: '玩家2',
-          seatNumber: 2,
-          status: PlayerStatus.ready,
-        ),
-        PlayerIdentity(
-          playerId: 'player3',
-          playerName: '玩家3',
-          seatNumber: 3,
-          status: PlayerStatus.online,
-        ),
-      ],
-      status: RoomStatus.waiting,
-      maxPlayerCount: 3,
-      gameConfig: {},
-      createdAt: DateTime.now(),
-    );
-
-    final mockState = state.copyWith(room: mockRoom, currentPlayerId: 'player1');
+    // 仅在没有真实房间数据时使用模拟数据展示
+    final Room effectiveRoom;
+    final LobbyState effectiveState;
+    if (room != null) {
+      effectiveRoom = room;
+      effectiveState = state;
+    } else {
+      effectiveRoom = Room(
+        roomId: 'mock-room',
+        roomName: '欢乐对战',
+        gameType: GameType.doudizhu,
+        hostPlayerId: 'player1',
+        players: [
+          PlayerIdentity(
+            playerId: 'player1',
+            playerName: '玩家1（房主）',
+            seatNumber: 1,
+            status: PlayerStatus.ready,
+            isHost: true,
+          ),
+          PlayerIdentity(
+            playerId: 'player2',
+            playerName: '玩家2',
+            seatNumber: 2,
+            status: PlayerStatus.ready,
+          ),
+          PlayerIdentity(
+            playerId: 'player3',
+            playerName: '玩家3',
+            seatNumber: 3,
+            status: PlayerStatus.online,
+          ),
+        ],
+        status: RoomStatus.waiting,
+        maxPlayerCount: 3,
+        gameConfig: {},
+        createdAt: DateTime.now(),
+      );
+      effectiveState = state.copyWith(room: effectiveRoom, currentPlayerId: 'player1');
+    }
 
     return WillPopScope(
       onWillPop: () async {
@@ -347,9 +394,9 @@ class RoomLobbyPage extends ConsumerWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(mockRoom.roomName),
+          title: Text(effectiveRoom.roomName),
           actions: [
-            if (mockState.isHost)
+            if (effectiveState.isHost)
               IconButton(
                 icon: const Icon(Icons.settings),
                 onPressed: () => _showRoomSettings(context, ref),
@@ -358,12 +405,12 @@ class RoomLobbyPage extends ConsumerWidget {
         ),
         body: Column(
           children: [
-            _buildRoomInfo(context, mockRoom),
+            _buildRoomInfo(context, effectiveRoom),
             const Divider(),
             Expanded(
-              child: _buildPlayerList(context, ref, mockState),
+              child: _buildPlayerList(context, ref, effectiveState),
             ),
-            _buildBottomActions(context, ref, mockState),
+            _buildBottomActions(context, ref, effectiveState),
           ],
         ),
       ),
@@ -621,6 +668,60 @@ class RoomLobbyPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// 任务 6.1-6.3：根据游戏类型路由至对应游戏页面并初始化 NetworkAdapter
+  void _navigateToGame(BuildContext context, WidgetRef ref, LobbyState lobbyState) {
+    final room = lobbyState.room;
+    if (room == null) return;
+    final lobbyNotifier = ref.read(lobbyProvider.notifier);
+    final isHost = lobbyState.isHost;
+    // 任务 6.2：使用房间分配的玩家 ID 作为本地玩家 ID
+    final localPlayerId = lobbyState.currentPlayerId ?? 'player1';
+
+    final incomingStream = isHost
+        ? lobbyNotifier.hostGameStream
+        : lobbyNotifier.clientGameStream;
+
+    void broadcastFn(Map<String, dynamic> msg) {
+      if (isHost) {
+        lobbyNotifier.broadcastGameMessage(msg);
+      } else {
+        lobbyNotifier.sendGameMessage(msg);
+      }
+    }
+
+    switch (room.gameType) {
+      case GameType.texasHoldem:
+        // 任务 6.3：Host 初始化并启动 HoldemNetworkAdapter
+        final holdemNotifier = ref.read(holdemGameProvider.notifier);
+        final adapter = HoldemNetworkAdapter(
+          incomingStream: incomingStream,
+          broadcastFn: broadcastFn,
+          notifier: holdemNotifier,
+          isHost: isHost,
+          localPlayerId: localPlayerId,
+        );
+        adapter.start();
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => HoldemGamePage(isOnline: true, networkAdapter: adapter),
+        ));
+      case GameType.zhajinhua:
+        final zhjNotifier = ref.read(zhjGameProvider.notifier);
+        final adapter = ZhjNetworkAdapter(
+          incomingStream: incomingStream,
+          broadcastFn: broadcastFn,
+          notifier: zhjNotifier,
+          isHost: isHost,
+          localPlayerId: localPlayerId,
+        );
+        adapter.start();
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => ZhajinhuaPage(isOnline: true, networkAdapter: adapter),
+        ));
+      case GameType.doudizhu:
+        context.push('/doudizhu');
+    }
   }
 }
 

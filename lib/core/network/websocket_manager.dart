@@ -61,6 +61,10 @@ class WebSocketManager {
   /// 消息流
   Stream<_WebSocketMessage> get messageStream => _messageController.stream;
 
+  /// 仅包含消息数据的流（供游戏适配器使用）
+  Stream<Map<String, dynamic>> get dataStream =>
+      _messageController.stream.map((msg) => msg.data);
+
   /// 心跳间隔
   final Duration heartbeatInterval;
 
