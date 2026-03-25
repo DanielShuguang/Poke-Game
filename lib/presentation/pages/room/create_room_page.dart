@@ -12,6 +12,7 @@ final createRoomFormProvider = StateProvider<CreateRoomFormData>((ref) {
   return CreateRoomFormData(
     roomName: '',
     gameType: GameType.doudizhu,
+    maxPlayers: GameType.doudizhu.fixedPlayerCount ?? GameType.doudizhu.maxPlayerCount,
     hasPassword: false,
     password: '',
   );
@@ -21,12 +22,14 @@ final createRoomFormProvider = StateProvider<CreateRoomFormData>((ref) {
 class CreateRoomFormData {
   final String roomName;
   final GameType gameType;
+  final int maxPlayers;
   final bool hasPassword;
   final String password;
 
   CreateRoomFormData({
     required this.roomName,
     required this.gameType,
+    required this.maxPlayers,
     required this.hasPassword,
     required this.password,
   });
@@ -34,12 +37,14 @@ class CreateRoomFormData {
   CreateRoomFormData copyWith({
     String? roomName,
     GameType? gameType,
+    int? maxPlayers,
     bool? hasPassword,
     String? password,
   }) {
     return CreateRoomFormData(
       roomName: roomName ?? this.roomName,
       gameType: gameType ?? this.gameType,
+      maxPlayers: maxPlayers ?? this.maxPlayers,
       hasPassword: hasPassword ?? this.hasPassword,
       password: password ?? this.password,
     );
@@ -69,7 +74,7 @@ class CreateRoomPage extends ConsumerWidget {
             const SizedBox(height: 16),
             _buildPasswordSection(context, ref, formData),
             const SizedBox(height: 24),
-            _buildPlayerCountInfo(context, formData),
+            _buildPlayerCountConfig(context, ref, formData),
             const SizedBox(height: 32),
             _buildCreateButton(context, ref, formData),
           ],
@@ -116,32 +121,25 @@ class CreateRoomPage extends ConsumerWidget {
           runSpacing: 8,
           children: GameType.values.map((type) {
             final isSelected = formData.gameType == type;
-            final isAvailable = type == GameType.doudizhu; // 目前只有斗地主可用
 
             return ChoiceChip(
               label: Text(type.displayName),
               selected: isSelected,
-              onSelected: isAvailable
-                  ? (selected) {
-                      if (selected) {
-                        ref.read(createRoomFormProvider.notifier).state =
-                            formData.copyWith(gameType: type);
-                      }
-                    }
-                  : null,
+              onSelected: (selected) {
+                if (selected) {
+                  // 切换游戏类型时重置 maxPlayers 为新类型的最大值
+                  final newMaxPlayers =
+                      type.fixedPlayerCount ?? type.maxPlayerCount;
+                  ref.read(createRoomFormProvider.notifier).state =
+                      formData.copyWith(
+                    gameType: type,
+                    maxPlayers: newMaxPlayers,
+                  );
+                }
+              },
             );
           }).toList(),
         ),
-        if (formData.gameType != GameType.doudizhu)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              '该游戏暂未开放，敬请期待',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.orange,
-                  ),
-            ),
-          ),
       ],
     );
   }
@@ -184,7 +182,11 @@ class CreateRoomPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildPlayerCountInfo(BuildContext context, CreateRoomFormData formData) {
+  Widget _buildPlayerCountConfig(
+    BuildContext context,
+    WidgetRef ref,
+    CreateRoomFormData formData,
+  ) {
     final gameType = formData.gameType;
 
     return Card(
@@ -205,9 +207,30 @@ class CreateRoomPage extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             if (gameType.fixedPlayerCount != null)
-              Text('固定人数: ${gameType.fixedPlayerCount} 人')
-            else
-              Text('人数范围: ${gameType.minPlayerCount} - ${gameType.maxPlayerCount} 人'),
+              Text('固定人数：${gameType.fixedPlayerCount} 人')
+            else ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('最大人数：${formData.maxPlayers} 人'),
+                  Text(
+                    '${gameType.minPlayerCount} - ${gameType.maxPlayerCount} 人',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+              Slider(
+                value: formData.maxPlayers.toDouble(),
+                min: gameType.minPlayerCount.toDouble(),
+                max: gameType.maxPlayerCount.toDouble(),
+                divisions: gameType.maxPlayerCount - gameType.minPlayerCount,
+                label: '${formData.maxPlayers} 人',
+                onChanged: (value) {
+                  ref.read(createRoomFormProvider.notifier).state =
+                      formData.copyWith(maxPlayers: value.toInt());
+                },
+              ),
+            ],
           ],
         ),
       ),
@@ -220,7 +243,6 @@ class CreateRoomPage extends ConsumerWidget {
     CreateRoomFormData formData,
   ) {
     final canCreate = formData.roomName.isNotEmpty &&
-        formData.gameType == GameType.doudizhu &&
         (!formData.hasPassword || formData.password.isNotEmpty);
 
     return ElevatedButton(
@@ -256,6 +278,10 @@ class CreateRoomPage extends ConsumerWidget {
     final roomId = uuid.v4();
     final hostPlayerId = uuid.v4();
 
+    // 人数：固定游戏类型取固定值，否则取用户选择的值
+    final maxPlayerCount =
+        formData.gameType.fixedPlayerCount ?? formData.maxPlayers;
+
     // 创建房间
     final room = Room(
       roomId: roomId,
@@ -274,7 +300,7 @@ class CreateRoomPage extends ConsumerWidget {
         ),
       ],
       status: RoomStatus.waiting,
-      maxPlayerCount: formData.gameType.fixedPlayerCount ?? formData.gameType.maxPlayerCount,
+      maxPlayerCount: maxPlayerCount,
       gameConfig: {},
       createdAt: DateTime.now(),
       password: formData.hasPassword ? formData.password : null,
