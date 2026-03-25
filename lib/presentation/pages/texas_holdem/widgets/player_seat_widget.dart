@@ -139,8 +139,8 @@ class _HoleCards extends StatelessWidget {
           child: CardWidget(
             card: card,
             faceUp: showCards && !player.isFolded,
-            width: 34,
-            height: 48,
+            width: 44,
+            height: 62,
           ),
         );
       }).toList(),
