@@ -27,9 +27,9 @@ List<GameInfo> _getMockGames() {
     const GameInfo(
       id: 'texas-holdem',
       name: '德州扑克',
-      description: '经典德州扑克游戏',
+      description: '现金局·支持人机对战与局域网多人',
       icon: '🃏',
-      status: GameStatus.comingSoon,
+      status: GameStatus.available,
       category: GameCategory.cardGames,
       route: '/texas-holdem',
     ),
