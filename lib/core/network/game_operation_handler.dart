@@ -9,7 +9,6 @@ import 'package:poke_game/domain/doudizhu/validators/card_validator.dart';
 ///
 /// 验证玩家操作的合法性
 class GameOperationValidator {
-  final Logger _logger = Logger();
 
   /// 验证出牌操作
   ValidationResult validatePlayCards({

@@ -59,7 +59,7 @@ class PotCalculator {
   /// [winnerIdsByPot] 每个底池的获胜玩家 ID 列表（可多人平局）。
   /// [smallBlindPlayerId] 小盲玩家 ID，奇数筹码余数归此玩家。
   ///
-  /// 返回每个玩家获得的筹码数 Map<playerId, amount>。
+  /// 返回每个玩家获得的筹码数 `Map<playerId, amount>`。
   static Map<String, int> distribute(
     List<Pot> pots,
     List<List<String>> winnerIdsByPot, {

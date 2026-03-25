@@ -133,8 +133,6 @@ class GameEventRepository {
 ///
 /// 管理单个房间的事件溯源
 class RoomEventManager {
-  final Logger _logger = Logger();
-
   /// 房间ID
   final String roomId;
 

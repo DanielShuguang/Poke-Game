@@ -154,8 +154,6 @@ class NetworkOptimizer {
 
 /// 延迟统计器
 class LatencyTracker {
-  final Logger _logger = Logger();
-
   /// 最大样本数
   final int maxSamples;
 

@@ -127,7 +127,7 @@ class PlayerInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: isCurrentPlayer
-          ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
+          ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3)
           : null,
       child: InkWell(
         onTap: onTap,

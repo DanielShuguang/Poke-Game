@@ -80,9 +80,6 @@ class LobbyNotifier extends StateNotifier<LobbyState> {
   /// 是否是房主模式
   bool _isHostMode = false;
 
-  /// 房间网络地址（客户端模式）
-  String? _serverAddress;
-
   LobbyNotifier() : super(const LobbyState());
 
   /// 初始化房主模式
@@ -174,7 +171,6 @@ class LobbyNotifier extends StateNotifier<LobbyState> {
     String serverAddress,
   ) async {
     _isHostMode = false;
-    _serverAddress = serverAddress;
     state = state.copyWith(room: room, currentPlayerId: currentPlayerId);
 
     // 初始化 WebSocket 客户端
@@ -387,10 +383,10 @@ class _RoomLobbyPageState extends ConsumerState<RoomLobbyPage> {
       effectiveState = state.copyWith(room: effectiveRoom, currentPlayerId: 'player1');
     }
 
-    return WillPopScope(
-      onWillPop: () async {
-        _showLeaveDialog(context, ref);
-        return false;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _showLeaveDialog(context, ref);
       },
       child: Scaffold(
         appBar: AppBar(
@@ -503,7 +499,7 @@ class _RoomLobbyPageState extends ConsumerState<RoomLobbyPage> {
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),

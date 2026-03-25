@@ -8,7 +8,6 @@ import 'package:uuid/uuid.dart';
 /// 敏感词过滤器
 class SensitiveWordFilter {
   final Set<String> _sensitiveWords;
-  final Logger _logger = Logger();
 
   SensitiveWordFilter({Set<String>? sensitiveWords})
       : _sensitiveWords = sensitiveWords ?? _defaultSensitiveWords;

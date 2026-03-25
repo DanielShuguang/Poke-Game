@@ -9,7 +9,6 @@ import 'package:uuid/uuid.dart';
 class CreateRoomUseCase {
   final RoomRepository _repository;
   final Logger _logger = Logger();
-  final Uuid _uuid = const Uuid();
 
   CreateRoomUseCase(this._repository);
 

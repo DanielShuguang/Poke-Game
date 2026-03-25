@@ -1,7 +1,6 @@
 import 'package:logger/logger.dart';
 import 'package:poke_game/core/network/game_event_repository.dart';
 import 'package:poke_game/core/network/game_operation_handler.dart';
-import 'package:poke_game/core/network/game_state_serializer.dart';
 import 'package:poke_game/core/network/websocket_manager.dart';
 import 'package:poke_game/domain/doudizhu/entities/card.dart';
 import 'package:poke_game/domain/doudizhu/entities/game_state.dart';
@@ -9,14 +8,11 @@ import 'package:poke_game/domain/lan/entities/game_event.dart';
 
 /// 游戏状态同步服务（房主端）
 class GameStateSyncService {
-  final Logger _logger = Logger();
-  final WebSocketManager _wsManager;
   final GameEventRepository _eventRepo;
-  final GameStateSerializer _serializer = GameStateSerializer();
   final GameOperationBroadcaster _broadcaster;
 
-  GameStateSyncService(this._wsManager, this._eventRepo)
-      : _broadcaster = GameOperationBroadcaster(_wsManager);
+  GameStateSyncService(WebSocketManager wsManager, this._eventRepo)
+      : _broadcaster = GameOperationBroadcaster(wsManager);
 
   /// 同步发牌事件
   void syncDealCards(String playerId, List<Card> cards) {

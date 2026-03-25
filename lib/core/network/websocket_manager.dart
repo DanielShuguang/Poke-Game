@@ -58,9 +58,6 @@ class WebSocketManager {
   final StreamController<_WebSocketMessage> _messageController =
       StreamController<_WebSocketMessage>.broadcast();
 
-  /// 消息流
-  Stream<_WebSocketMessage> get messageStream => _messageController.stream;
-
   /// 仅包含消息数据的流（供游戏适配器使用）
   Stream<Map<String, dynamic>> get dataStream =>
       _messageController.stream.map((msg) => msg.data);
