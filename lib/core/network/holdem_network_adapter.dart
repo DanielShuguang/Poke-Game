@@ -107,8 +107,8 @@ class HoldemNetworkAdapter {
 
   /// Client：处理 Host 广播的状态
   void _handleStateSyncFromHost(Map<String, dynamic> data) {
-    // 完整的状态反序列化超出本期范围；
-    // 实际部署时需要实现 HoldemGameState.fromJson 并调用 notifier 更新。
+    final newState = HoldemGameState.fromJson(data, localPlayerId: localPlayerId);
+    _notifier.applyNetworkState(newState);
   }
 
   void _broadcastState(HoldemGameState state) {

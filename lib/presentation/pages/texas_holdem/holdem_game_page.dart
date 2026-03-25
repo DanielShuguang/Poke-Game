@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:poke_game/core/network/holdem_network_adapter.dart';
 import 'package:poke_game/domain/texas_holdem/entities/holdem_game_state.dart';
+import 'package:poke_game/domain/texas_holdem/usecases/betting_usecases.dart';
 import 'package:poke_game/presentation/pages/texas_holdem/holdem_provider.dart';
 import 'package:poke_game/presentation/pages/texas_holdem/widgets/community_cards_widget.dart';
 import 'package:poke_game/presentation/pages/texas_holdem/widgets/player_seat_widget.dart';
@@ -10,7 +12,17 @@ import 'package:poke_game/presentation/pages/texas_holdem/widgets/betting_action
 
 /// 德州扑克游戏页面
 class HoldemGamePage extends ConsumerStatefulWidget {
-  const HoldemGamePage({super.key});
+  /// 是否为联机模式
+  final bool isOnline;
+
+  /// 联机网络适配器（联机模式时提供）
+  final HoldemNetworkAdapter? networkAdapter;
+
+  const HoldemGamePage({
+    super.key,
+    this.isOnline = false,
+    this.networkAdapter,
+  });
 
   @override
   ConsumerState<HoldemGamePage> createState() => _HoldemGamePageState();
@@ -159,6 +171,13 @@ class _HoldemGamePageState extends ConsumerState<HoldemGamePage> {
 
     final human = state.players[humanIdx];
     final isMyTurn = humanIdx == state.currentPlayerIndex;
+    final isOnline = widget.isOnline;
+    final adapter = widget.networkAdapter;
+
+    // 联机模式：非自己回合禁用操作
+    final canAct = isMyTurn &&
+        state.phase != GamePhase.waiting &&
+        state.phase != GamePhase.finished;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -172,18 +191,55 @@ class _HoldemGamePageState extends ConsumerState<HoldemGamePage> {
           bigBlindIndex: state.bigBlindIndex,
           showHoleCards: true, // 人类玩家始终看到自己的底牌
         ),
-        if (isMyTurn &&
-            state.phase != GamePhase.waiting &&
-            state.phase != GamePhase.finished)
+        if (canAct)
           BettingActionWidget(
             state: state,
             player: human,
-            onFold: () => ref.read(holdemGameProvider.notifier).fold(),
-            onCheck: () => ref.read(holdemGameProvider.notifier).check(),
-            onCall: () => ref.read(holdemGameProvider.notifier).call(),
-            onRaise: (amount) =>
-                ref.read(holdemGameProvider.notifier).raise(amount),
-            onAllIn: () => ref.read(holdemGameProvider.notifier).allIn(),
+            onFold: () {
+              if (isOnline && adapter != null && !adapter.isHost) {
+                adapter.sendAction(const FoldAction());
+              } else {
+                ref.read(holdemGameProvider.notifier).fold();
+              }
+            },
+            onCheck: () {
+              if (isOnline && adapter != null && !adapter.isHost) {
+                adapter.sendAction(const CheckAction());
+              } else {
+                ref.read(holdemGameProvider.notifier).check();
+              }
+            },
+            onCall: () {
+              if (isOnline && adapter != null && !adapter.isHost) {
+                adapter.sendAction(const CallAction());
+              } else {
+                ref.read(holdemGameProvider.notifier).call();
+              }
+            },
+            onRaise: (amount) {
+              if (isOnline && adapter != null && !adapter.isHost) {
+                adapter.sendAction(RaiseAction(amount));
+              } else {
+                ref.read(holdemGameProvider.notifier).raise(amount);
+              }
+            },
+            onAllIn: () {
+              if (isOnline && adapter != null && !adapter.isHost) {
+                adapter.sendAction(const AllInAction());
+              } else {
+                ref.read(holdemGameProvider.notifier).allIn();
+              }
+            },
+          )
+        else if (isOnline && !canAct &&
+            state.phase != GamePhase.waiting &&
+            state.phase != GamePhase.finished)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              '等待其他玩家操作...',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+            ),
           ),
         const SizedBox(height: 8),
       ],

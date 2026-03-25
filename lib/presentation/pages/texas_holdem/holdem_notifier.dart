@@ -192,4 +192,9 @@ class HoldemGameNotifier extends StateNotifier<HoldemGameState> {
 
   /// 暴露当前状态（供网络层等外部使用）
   HoldemGameState get currentState => state;
+
+  /// 通过网络状态更新本地状态（联机 Client 模式使用）
+  void applyNetworkState(HoldemGameState newState) {
+    state = newState;
+  }
 }

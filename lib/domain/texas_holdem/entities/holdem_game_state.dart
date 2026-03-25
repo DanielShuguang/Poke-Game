@@ -157,6 +157,115 @@ class HoldemGameState {
   @override
   String toString() =>
       'HoldemGameState(phase=$phase, players=${players.length}, pot=$totalPot)';
+
+  /// 序列化为 JSON（用于网络传输）
+  Map<String, dynamic> toJson() {
+    return {
+      'phase': phase.name,
+      'currentPlayerIndex': currentPlayerIndex,
+      'dealerIndex': dealerIndex,
+      'smallBlind': smallBlind,
+      'bigBlind': bigBlind,
+      'currentBet': currentBet,
+      'minRaise': minRaise,
+      'isAiMode': isAiMode,
+      'humanPlayerId': humanPlayerId,
+      'players': players
+          .map((p) => {
+                'id': p.id,
+                'name': p.name,
+                'chips': p.chips,
+                'currentBet': p.currentBet,
+                'isFolded': p.isFolded,
+                'isAllIn': p.isAllIn,
+                'holeCards': p.holeCards
+                    .map((c) => {'suit': c.suit.name, 'rank': c.rank})
+                    .toList(),
+              })
+          .toList(),
+      'communityCards': communityCards
+          .map((c) => {'suit': c.suit.name, 'rank': c.rank})
+          .toList(),
+      'pots': pots
+          .map((p) => {
+                'amount': p.amount,
+                'eligiblePlayerIds': p.eligiblePlayerIds,
+              })
+          .toList(),
+    };
+  }
+
+  /// 从 JSON 反序列化（用于网络接收）
+  static HoldemGameState fromJson(
+    Map<String, dynamic> json, {
+    String? localPlayerId,
+  }) {
+    GamePhase parsePhase(String? name) {
+      return GamePhase.values.firstWhere(
+        (e) => e.name == name,
+        orElse: () => GamePhase.waiting,
+      );
+    }
+
+    Suit parseSuit(String? name) {
+      return Suit.values.firstWhere(
+        (e) => e.name == name,
+        orElse: () => Suit.spade,
+      );
+    }
+
+    Card parseCard(Map<String, dynamic> c) {
+      return Card(
+        suit: parseSuit(c['suit'] as String?),
+        rank: (c['rank'] as num?)?.toInt() ?? 2,
+      );
+    }
+
+    final playersJson = (json['players'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    final players = playersJson.map((p) {
+      final pid = p['id'] as String? ?? '';
+      final isLocal = localPlayerId != null && pid == localPlayerId;
+      final holeCardsJson = (p['holeCards'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      // 客户端只显示自己的手牌
+      final holeCards = isLocal || localPlayerId == null
+          ? holeCardsJson.map(parseCard).toList()
+          : <Card>[];
+      return HoldemPlayer(
+        id: pid,
+        name: p['name'] as String? ?? '',
+        chips: (p['chips'] as num?)?.toInt() ?? 0,
+        currentBet: (p['currentBet'] as num?)?.toInt() ?? 0,
+        isFolded: p['isFolded'] as bool? ?? false,
+        isAllIn: p['isAllIn'] as bool? ?? false,
+        holeCards: holeCards,
+      );
+    }).toList();
+
+    final communityJson = (json['communityCards'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    final potsJson = (json['pots'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+
+    return HoldemGameState(
+      players: players,
+      communityCards: communityJson.map(parseCard).toList(),
+      pots: potsJson
+          .map((p) => Pot(
+                amount: (p['amount'] as num?)?.toInt() ?? 0,
+                eligiblePlayerIds: (p['eligiblePlayerIds'] as List?)
+                        ?.cast<String>() ??
+                    [],
+              ))
+          .toList(),
+      phase: parsePhase(json['phase'] as String?),
+      currentPlayerIndex: (json['currentPlayerIndex'] as num?)?.toInt() ?? 0,
+      dealerIndex: (json['dealerIndex'] as num?)?.toInt() ?? 0,
+      smallBlind: (json['smallBlind'] as num?)?.toInt() ?? 10,
+      bigBlind: (json['bigBlind'] as num?)?.toInt() ?? 20,
+      currentBet: (json['currentBet'] as num?)?.toInt() ?? 0,
+      minRaise: (json['minRaise'] as num?)?.toInt() ?? 20,
+      isAiMode: json['isAiMode'] as bool? ?? false,
+      humanPlayerId: json['humanPlayerId'] as String?,
+    );
+  }
 }
 
 /// 创建德州扑克标准牌组（52张，无王，rank 2-14）
