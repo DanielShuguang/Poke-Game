@@ -25,6 +25,9 @@ class DoudizhuUiState {
   /// 非阻塞性提示消息（如：全部不叫，重新发牌）
   final String? infoMessage;
 
+  /// 人类玩家回合计数，每次轮到人类出牌时递增，用于重置倒计时
+  final int turnKey;
+
   const DoudizhuUiState({
     required this.gameState,
     this.selectedCards = const {},
@@ -33,6 +36,7 @@ class DoudizhuUiState {
     this.winners,
     this.hintCards,
     this.infoMessage,
+    this.turnKey = 0,
   });
 
   /// 初始状态
@@ -51,6 +55,7 @@ class DoudizhuUiState {
     bool clearHintCards = false,
     String? infoMessage,
     bool clearInfoMessage = false,
+    int? turnKey,
   }) {
     return DoudizhuUiState(
       gameState: gameState ?? this.gameState,
@@ -60,6 +65,7 @@ class DoudizhuUiState {
       winners: winners,
       hintCards: clearHintCards ? null : (hintCards ?? this.hintCards),
       infoMessage: clearInfoMessage ? null : (infoMessage ?? this.infoMessage),
+      turnKey: turnKey ?? this.turnKey,
     );
   }
 

@@ -115,6 +115,9 @@ class DoudizhuNotifier extends StateNotifier<DoudizhuUiState> {
       final callingIndex = gameState.callingPlayerIndex ?? 0;
       if (gameState.players[callingIndex] is AiPlayer) {
         await _handleAiCall();
+      } else {
+        // 人类先叫，递增 turnKey
+        state = state.copyWith(turnKey: state.turnKey + 1);
       }
     } catch (e) {
       state = state.copyWith(
@@ -160,6 +163,9 @@ class DoudizhuNotifier extends StateNotifier<DoudizhuUiState> {
         final landlord = newGameState.landlord;
         if (landlord is AiPlayer) {
           await _handleAiPlay();
+        } else {
+          // 人类是地主，先出牌，递增 turnKey
+          state = state.copyWith(turnKey: state.turnKey + 1);
         }
       } else if (newGameState.phase == GamePhase.waiting) {
         // 全部不叫，重新发牌（延迟一下让用户看到提示）
@@ -759,6 +765,9 @@ class DoudizhuNotifier extends StateNotifier<DoudizhuUiState> {
       final landlord = newGameState.landlord;
       if (landlord is AiPlayer) {
         await _handleAiPlay();
+      } else {
+        // 人类是地主，递增 turnKey
+        state = state.copyWith(turnKey: state.turnKey + 1);
       }
     } else if (newGameState.phase == GamePhase.waiting) {
       // 全部不叫，重新发牌（延迟一下让用户看到提示）
@@ -810,6 +819,8 @@ class DoudizhuNotifier extends StateNotifier<DoudizhuUiState> {
         // 检查下一个玩家是否是人类
         final nextPlayer = gameState.players[gameState.currentPlayerIndex];
         if (nextPlayer is! AiPlayer) {
+          // 轮到人类，递增 turnKey 驱动倒计时重置
+          state = state.copyWith(turnKey: state.turnKey + 1);
           break;
         }
       } catch (e) {

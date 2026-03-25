@@ -291,6 +291,21 @@ class _DoudizhuGamePageState extends ConsumerState<DoudizhuGamePage> {
               onHint: canPlay ? () => notifier.showHintCards() : null,
             ),
           ),
+        // 出牌倒计时（仅人类回合显示）
+        if (isHumanTurn)
+          _TurnCountdown(
+            key: ValueKey('turn_${state.turnKey}'),
+            seconds: 15,
+            canPass: canPass,
+            onTimeout: () {
+              if (canPass) {
+                notifier.passTurn();
+              } else {
+                notifier.showHintCards();
+                notifier.playCards();
+              }
+            },
+          ),
         // 底部：手牌
         Container(
           padding: const EdgeInsets.all(8),
@@ -376,6 +391,142 @@ class _DoudizhuGamePageState extends ConsumerState<DoudizhuGamePage> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 出牌回合倒计时组件
+/// 超时后自动触发 [onTimeout]，最后3秒进度条变红并闪烁警告文字
+class _TurnCountdown extends StatefulWidget {
+  final int seconds;
+  final bool canPass;
+  final VoidCallback onTimeout;
+
+  const _TurnCountdown({
+    super.key,
+    required this.seconds,
+    required this.canPass,
+    required this.onTimeout,
+  });
+
+  @override
+  State<_TurnCountdown> createState() => _TurnCountdownState();
+}
+
+class _TurnCountdownState extends State<_TurnCountdown>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  bool _triggered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: widget.seconds),
+    )..forward();
+
+    _ctrl.addStatusListener((status) {
+      if (status == AnimationStatus.completed && !_triggered) {
+        _triggered = true;
+        widget.onTimeout();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (_, __) {
+        final remaining = 1 - _ctrl.value;
+        final remainingSecs = (remaining * widget.seconds).ceil();
+        final isUrgent = remainingSecs <= 3;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 最后3秒警告文字（闪烁效果用 Opacity 交替）
+              if (isUrgent)
+                _BlinkText(
+                  text: '请尽快出牌！剩余 $remainingSecs 秒',
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                )
+              else
+                Text(
+                  '剩余 $remainingSecs 秒',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 12,
+                  ),
+                ),
+              const SizedBox(height: 4),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: remaining,
+                  minHeight: 6,
+                  backgroundColor: Colors.grey.shade300,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    isUrgent ? Colors.red : Colors.teal,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// 闪烁文字（最后3秒警告用）
+class _BlinkText extends StatefulWidget {
+  final String text;
+  final TextStyle style;
+
+  const _BlinkText({required this.text, required this.style});
+
+  @override
+  State<_BlinkText> createState() => _BlinkTextState();
+}
+
+class _BlinkTextState extends State<_BlinkText>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: Tween<double>(begin: 0.3, end: 1.0).animate(_ctrl),
+      child: Text(widget.text, style: widget.style),
     );
   }
 }
