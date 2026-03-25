@@ -73,6 +73,9 @@ class HomePage extends ConsumerWidget {
               child: GameCardWidget(
                 game: game,
                 onTap: () => _handleGameTap(context, game),
+                onOnlineTap: _supportsOnline(game.id)
+                    ? () => context.push('/room/scan?gameType=${game.id}')
+                    : null,
               ),
             )),
             const SizedBox(height: 16),
@@ -181,6 +184,11 @@ class HomePage extends ConsumerWidget {
             fontWeight: FontWeight.bold,
           ),
     );
+  }
+
+  /// 是否支持联机对战（斗地主、德州扑克、炸金花）
+  bool _supportsOnline(String gameId) {
+    return gameId == 'doudizhu' || gameId == 'texas-holdem' || gameId == 'zhajinhua';
   }
 
   void _handleGameTap(BuildContext context, GameInfo game) {

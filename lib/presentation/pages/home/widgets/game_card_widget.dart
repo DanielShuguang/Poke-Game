@@ -6,10 +6,14 @@ class GameCardWidget extends StatelessWidget {
   final GameInfo game;
   final VoidCallback onTap;
 
+  /// 联机对战按钮回调（为 null 时不显示按钮）
+  final VoidCallback? onOnlineTap;
+
   const GameCardWidget({
     super.key,
     required this.game,
     required this.onTap,
+    this.onOnlineTap,
   });
 
   @override
@@ -65,6 +69,24 @@ class GameCardWidget extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    if (onOnlineTap != null) ...[
+                      const SizedBox(height: 4),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: onOnlineTap,
+                          icon: const Icon(Icons.wifi, size: 14),
+                          label: const Text('联机对战'),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            textStyle: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

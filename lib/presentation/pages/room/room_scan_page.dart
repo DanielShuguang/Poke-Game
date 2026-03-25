@@ -11,15 +11,34 @@ import 'package:dio/dio.dart';
 
 /// 房间扫描页面
 class RoomScanPage extends ConsumerWidget {
-  const RoomScanPage({super.key});
+  /// 过滤游戏类型（game id 字符串，如 "texas-holdem"、"zhajinhua"）
+  /// 为 null 时显示所有房间
+  final String? filterGameType;
+
+  const RoomScanPage({super.key, this.filterGameType});
+
+  /// 将 home_provider 中的 game id 映射为 GameType 枚举
+  GameType? get _filterType {
+    switch (filterGameType) {
+      case 'texas-holdem':
+        return GameType.texasHoldem;
+      case 'zhajinhua':
+        return GameType.zhajinhua;
+      case 'doudizhu':
+        return GameType.doudizhu;
+      default:
+        return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(roomScanProvider);
+    final titleSuffix = _filterType != null ? ' · ${_filterType!.displayName}' : '';
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('局域网对战'),
+        title: Text('局域网对战$titleSuffix'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -243,11 +262,19 @@ class RoomScanPage extends ConsumerWidget {
     WidgetRef ref,
     RoomScanState state,
   ) {
+    final rooms = _filterType != null
+        ? state.rooms.where((r) => r.gameType == _filterType).toList()
+        : state.rooms;
+
+    if (rooms.isEmpty) {
+      return _buildEmptyState(context, ref);
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: state.rooms.length,
+      itemCount: rooms.length,
       itemBuilder: (context, index) {
-        final room = state.rooms[index];
+        final room = rooms[index];
         return _RoomCard(room: room);
       },
     );

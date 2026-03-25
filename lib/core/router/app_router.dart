@@ -8,6 +8,7 @@ import 'package:poke_game/presentation/pages/room/create_room_page.dart';
 import 'package:poke_game/presentation/pages/room/room_lobby_page.dart';
 import 'package:poke_game/presentation/pages/texas_holdem/holdem_lobby_page.dart';
 import 'package:poke_game/presentation/pages/texas_holdem/holdem_game_page.dart';
+import 'package:poke_game/presentation/pages/zhajinhua/zhajinhua_page.dart';
 
 /// 应用路由配置
 final GoRouter appRouter = GoRouter(
@@ -33,8 +34,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/room/scan',
       name: 'room-scan',
-      builder: (BuildContext context, GoRouterState state) =>
-          const RoomScanPage(),
+      builder: (BuildContext context, GoRouterState state) {
+        final gameTypeStr = state.uri.queryParameters['gameType'];
+        return RoomScanPage(filterGameType: gameTypeStr);
+      },
     ),
     GoRoute(
       path: '/room/create',
@@ -60,6 +63,12 @@ final GoRouter appRouter = GoRouter(
       name: 'texas-holdem-game',
       builder: (BuildContext context, GoRouterState state) =>
           const HoldemGamePage(),
+    ),
+    GoRoute(
+      path: '/zhajinhua',
+      name: 'zhajinhua',
+      builder: (BuildContext context, GoRouterState state) =>
+          const ZhajinhuaPage(),
     ),
   ],
   errorBuilder: (BuildContext context, GoRouterState state) =>

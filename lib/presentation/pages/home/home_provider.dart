@@ -42,13 +42,12 @@ List<GameInfo> _getMockGames() {
       category: GameCategory.cardGames,
       route: '/blackjack',
     ),
-    // 扑克牌类 - 计划中
     const GameInfo(
       id: 'zhajinhua',
       name: '炸金花',
-      description: '经典炸金花扑克游戏',
+      description: '三张牌博弈，支持人机对战',
       icon: '💰',
-      status: GameStatus.planned,
+      status: GameStatus.available,
       category: GameCategory.cardGames,
       route: '/zhajinhua',
     ),
