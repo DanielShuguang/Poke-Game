@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:poke_game/domain/doudizhu/entities/card.dart' as poker;
 import 'package:poke_game/domain/texas_holdem/entities/holdem_game_state.dart';
+import 'package:poke_game/presentation/widgets/playing_card_widget.dart';
 
 /// 公牌区 Widget
 /// 展示5个卡牌位，未翻出时显示牌背，翻出时带翻转动画
@@ -22,7 +23,7 @@ class CommunityCardsWidget extends StatelessWidget {
         if (i < communityCards.length) {
           return _FlippableCard(card: communityCards[i]);
         }
-        return const _CardBack();
+        return const _CardBackSlot();
       }),
     );
   }
@@ -68,92 +69,35 @@ class _FlippableCardState extends State<_FlippableCard>
           alignment: Alignment.center,
           transform: Matrix4.rotationY(
               isFlipped ? 0 : (1 - _anim.value * 2) * 3.14159 / 2),
-          child: isFlipped
-              ? _CardFace(card: widget.card)
-              : const _CardBack(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: isFlipped
+                ? CardWidget(card: widget.card, width: 64, height: 90)
+                : const _CardBackSlot(),
+          ),
         );
       },
     );
   }
 }
 
-/// 牌面
-class _CardFace extends StatelessWidget {
-  final poker.Card card;
-  const _CardFace({required this.card});
+/// 牌背占位（未翻出的公牌）
+class _CardBackSlot extends StatelessWidget {
+  const _CardBackSlot();
+
+  // 占位用虚拟牌，只显示牌背
+  static const _dummy = poker.Card(suit: poker.Suit.spade, rank: 14);
 
   @override
   Widget build(BuildContext context) {
-    final isRed = card.isRed;
-    return _CardContainer(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            card.suitSymbol,
-            style: const TextStyle(fontSize: 20),
-          ),
-          Text(
-            card.displayText,
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: isRed ? Colors.red : Colors.black,
-            ),
-          ),
-        ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: CardWidget(
+        card: _dummy,
+        faceUp: false,
+        width: 64,
+        height: 90,
       ),
-    );
-  }
-}
-
-/// 牌背
-class _CardBack extends StatelessWidget {
-  const _CardBack();
-
-  @override
-  Widget build(BuildContext context) {
-    return _CardContainer(
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF1565C0), Color(0xFF0D47A1)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: const Center(
-          child: Text('🂠', style: TextStyle(fontSize: 26)),
-        ),
-      ),
-    );
-  }
-}
-
-class _CardContainer extends StatelessWidget {
-  final Widget child;
-  const _CardContainer({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      width: 64,
-      height: 90,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade300),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 6,
-            offset: const Offset(1, 3),
-          ),
-        ],
-      ),
-      child: child,
     );
   }
 }

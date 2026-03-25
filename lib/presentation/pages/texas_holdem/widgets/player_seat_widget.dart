@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:poke_game/domain/texas_holdem/entities/holdem_player.dart';
+import 'package:poke_game/presentation/widgets/playing_card_widget.dart';
 
 /// 玩家席位 Widget
 /// 显示名称、筹码、当前投注额、底牌、位置标记（D/SB/BB）、倒计时
@@ -133,60 +134,16 @@ class _HoleCards extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: player.holeCards.map((card) {
-        if (!showCards || player.isFolded) {
-          return _SmallCardBack();
-        }
-        return _SmallCardFace(card: card);
-      }).toList(),
-    );
-  }
-}
-
-class _SmallCardBack extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 2),
-      width: 34,
-      height: 48,
-      decoration: BoxDecoration(
-        color: const Color(0xFF1565C0),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.white24),
-      ),
-    );
-  }
-}
-
-class _SmallCardFace extends StatelessWidget {
-  final dynamic card;
-  const _SmallCardFace({required this.card});
-
-  @override
-  Widget build(BuildContext context) {
-    final isRed = card.isRed as bool;
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 2),
-      width: 34,
-      height: 48,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.grey.shade400),
-        boxShadow: [
-          BoxShadow(color: Colors.black26, blurRadius: 3, offset: const Offset(1, 2)),
-        ],
-      ),
-      child: Center(
-        child: Text(
-          '${card.suitSymbol}${card.displayText}',
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            color: isRed ? Colors.red : Colors.black,
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: CardWidget(
+            card: card,
+            faceUp: showCards && !player.isFolded,
+            width: 34,
+            height: 48,
           ),
-        ),
-      ),
+        );
+      }).toList(),
     );
   }
 }
