@@ -6,7 +6,6 @@ import 'package:poke_game/core/network/udp_broadcaster.dart';
 import 'package:poke_game/core/network/websocket_manager.dart';
 import 'package:poke_game/domain/lan/entities/game_event.dart';
 import 'package:poke_game/domain/lan/entities/room.dart';
-import 'package:poke_game/domain/lan/entities/room_info.dart';
 
 /// 房间状态同步服务
 ///

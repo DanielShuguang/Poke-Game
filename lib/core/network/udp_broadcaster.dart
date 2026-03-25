@@ -18,7 +18,7 @@ class UdpBroadcaster {
 
   RawDatagramSocket? _socket;
   Timer? _broadcastTimer;
-  bool _isListening = false;
+  final bool _isListening = false;
 
   UdpBroadcaster({
     this.port = 8081,

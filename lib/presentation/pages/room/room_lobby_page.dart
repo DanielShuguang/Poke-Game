@@ -288,6 +288,7 @@ class LobbyNotifier extends StateNotifier<LobbyState> {
   }
 
   /// 释放资源
+  @override
   void dispose() {
     _syncService?.dispose();
     _httpServer?.stop();

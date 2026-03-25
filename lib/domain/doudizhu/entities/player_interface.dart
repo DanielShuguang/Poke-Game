@@ -52,7 +52,7 @@ class LocalAIPlayer implements PlayerInterface {
   @override
   Future<PlayDecision> decidePlay(List<Card>? lastPlayedCards, int? lastPlayerIndex) async {
     if (_decidePlayCallback != null) {
-      return _decidePlayCallback!(lastPlayedCards, lastPlayerIndex);
+      return _decidePlayCallback(lastPlayedCards, lastPlayerIndex);
     }
     // 默认行为：过牌
     return const PlayDecision.pass();
@@ -61,7 +61,7 @@ class LocalAIPlayer implements PlayerInterface {
   @override
   Future<CallDecision> decideCall() async {
     if (_decideCallCallback != null) {
-      return _decideCallCallback!();
+      return _decideCallCallback();
     }
     // 默认行为：不叫
     return const CallDecision.pass();
