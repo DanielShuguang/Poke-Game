@@ -28,6 +28,9 @@ enum GameType {
 
   /// 21点
   blackjack,
+
+  /// 牛牛
+  niuniu,
 }
 
 /// 游戏类型扩展
@@ -43,6 +46,8 @@ extension GameTypeX on GameType {
         return '炸金花';
       case GameType.blackjack:
         return '21点';
+      case GameType.niuniu:
+        return '牛牛';
     }
   }
 
@@ -54,6 +59,7 @@ extension GameTypeX on GameType {
       case GameType.texasHoldem:
       case GameType.zhajinhua:
       case GameType.blackjack:
+      case GameType.niuniu:
         return null; // 可变人数
     }
   }
@@ -69,6 +75,8 @@ extension GameTypeX on GameType {
         return 2;
       case GameType.blackjack:
         return 2;
+      case GameType.niuniu:
+        return 2;
     }
   }
 
@@ -83,6 +91,8 @@ extension GameTypeX on GameType {
         return 6;
       case GameType.blackjack:
         return 7;
+      case GameType.niuniu:
+        return 6;
     }
   }
 

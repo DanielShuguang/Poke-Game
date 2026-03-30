@@ -272,6 +272,21 @@ class GameRulesPage extends StatelessWidget {
             Text('5. 赔率：Blackjack赔1.5倍，普通胜赔1倍，平局返还'),
           ],
         );
+      case GameType.niuniu:
+        return const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('1. 发牌：每人5张牌'),
+            SizedBox(height: 8),
+            Text('2. 判牛：从5张中找3张之和为10的倍数，余2张之和 mod 10 为牛X（0=牛牛）'),
+            SizedBox(height: 8),
+            Text('3. 特殊牌型：炸弹（4张同点）> 五小牛（5张全≤5且之和≤10）'),
+            SizedBox(height: 8),
+            Text('4. 倍率：无牛/牛1-6=×1，牛7-9=×2，牛牛=×3，五小牛/炸弹=×5'),
+            SizedBox(height: 8),
+            Text('5. 结算：庄家与每位闲家单独比较，按闲家倍率结算筹码（平局庄家优先）'),
+          ],
+        );
     }
   }
 }

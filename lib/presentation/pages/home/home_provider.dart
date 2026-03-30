@@ -54,9 +54,9 @@ List<GameInfo> _getMockGames() {
     const GameInfo(
       id: 'niuniu',
       name: '牛牛',
-      description: '经典牛牛扑克游戏',
+      description: '比牌博弈，支持人机对战',
       icon: '🐂',
-      status: GameStatus.planned,
+      status: GameStatus.available,
       category: GameCategory.cardGames,
       route: '/niuniu',
     ),
