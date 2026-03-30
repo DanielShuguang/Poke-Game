@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:poke_game/core/network/holdem_network_adapter.dart';
 import 'package:poke_game/domain/texas_holdem/entities/holdem_game_state.dart';
 import 'package:poke_game/domain/texas_holdem/usecases/betting_usecases.dart';
@@ -58,18 +57,18 @@ class _HoldemGamePageState extends ConsumerState<HoldemGamePage> {
         content: const Text('确定要退出当前游戏吗？'),
         actions: [
           TextButton(
-            onPressed: () => ctx.pop(false),
+            onPressed: () => Navigator.of(ctx).pop(false),
             child: const Text('取消'),
           ),
           TextButton(
-            onPressed: () => ctx.pop(true),
+            onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('退出', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
     if (confirmed == true && mounted) {
-      context.pop();
+      Navigator.pop(context);
     }
   }
 
@@ -106,29 +105,14 @@ class _HoldemGamePageState extends ConsumerState<HoldemGamePage> {
                 _buildHumanPlayerArea(state),
               ],
             ),
-            // 右上角退出按钮
+            // 左上角退出按钮
             Positioned(
               top: 8,
-              right: 8,
+              left: 8,
               child: SafeArea(
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: _confirmExit,
-                    borderRadius: BorderRadius.circular(24),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: const Icon(
-                        Icons.exit_to_app,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                  ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white70),
+                  onPressed: _confirmExit,
                 ),
               ),
             ),

@@ -1,4 +1,4 @@
-/// 牛牛游戏配置
+/// 斗牛游戏配置
 class NiuniuGameConfig {
   /// 使用几副标准牌
   final int deckCount;

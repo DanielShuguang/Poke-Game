@@ -215,9 +215,9 @@ class _NiuniuPageState extends ConsumerState<NiuniuPage> {
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white70),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => _confirmExit(context),
           ),
-          const Text('牛牛',
+          const Text('斗牛',
               style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
           const Spacer(),
           if (widget.isOnline)
@@ -298,6 +298,29 @@ class _NiuniuPageState extends ConsumerState<NiuniuPage> {
       onClear: () => setState(() => _pendingBet = 0),
       onConfirm: _pendingBet > 0 ? _confirmBet : null,
     );
+  }
+
+  Future<void> _confirmExit(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('退出游戏'),
+        content: const Text('确定要退出当前游戏吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('退出', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      Navigator.pop(context);
+    }
   }
 }
 

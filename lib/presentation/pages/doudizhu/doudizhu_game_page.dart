@@ -83,7 +83,7 @@ class _DoudizhuGamePageState extends ConsumerState<DoudizhuGamePage> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) {
-          _showExitDialog(context);
+          _confirmExit(context);
         }
       },
       child: Scaffold(
@@ -95,29 +95,14 @@ class _DoudizhuGamePageState extends ConsumerState<DoudizhuGamePage> {
                   ? const Center(child: CircularProgressIndicator())
                   : _buildGameBody(context, state, notifier),
             ),
-            // 退出按钮（右上角）
+            // 退出按钮（左上角）
             Positioned(
               top: 8,
-              right: 8,
+              left: 8,
               child: SafeArea(
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => _showExitDialog(context),
-                    borderRadius: BorderRadius.circular(24),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: const Icon(
-                        Icons.exit_to_app,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                  ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white70),
+                  onPressed: () => _confirmExit(context),
                 ),
               ),
             ),
@@ -371,27 +356,27 @@ class _DoudizhuGamePageState extends ConsumerState<DoudizhuGamePage> {
     );
   }
 
-  void _showExitDialog(BuildContext context) {
-    showDialog(
+  Future<void> _confirmExit(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         title: const Text('退出游戏'),
         content: const Text('确定要退出当前游戏吗？'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(ctx).pop(false),
             child: const Text('取消'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.go('/');
-            },
-            child: const Text('确定'),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('退出', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
+    if (confirmed == true && context.mounted) {
+      Navigator.pop(context);
+    }
   }
 }
 

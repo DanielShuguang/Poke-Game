@@ -1,10 +1,10 @@
-/// 牛牛网络行动类型
+/// 斗牛网络行动类型
 enum NiuniuActionType {
   /// 下注
   bet,
 }
 
-/// 牛牛网络行动
+/// 斗牛网络行动
 class NiuniuNetworkAction {
   final NiuniuActionType action;
   final String playerId;

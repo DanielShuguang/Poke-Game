@@ -5,7 +5,7 @@ import 'package:poke_game/domain/niuniu/entities/niuniu_game_config.dart';
 import 'package:poke_game/domain/niuniu/entities/niuniu_game_state.dart';
 import 'package:poke_game/domain/niuniu/entities/niuniu_hand.dart';
 
-/// 牛牛发牌 UseCase
+/// 斗牛发牌 UseCase
 ///
 /// 从牌堆为每位玩家（含庄家）发 5 张牌，阶段切换为 showdown。
 class DealNiuniuUseCase {

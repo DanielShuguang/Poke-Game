@@ -1,9 +1,9 @@
 import 'package:poke_game/domain/doudizhu/entities/card.dart';
 
-/// 牛牛复用斗地主的 Suit 枚举（spade/heart/club/diamond）
+/// 斗牛复用斗地主的 Suit 枚举（spade/heart/club/diamond）
 typedef NiuniuSuit = Suit;
 
-/// 牛牛牌面
+/// 斗牛牌面
 /// rank: 1=A, 2-10=数字, 11=J, 12=Q, 13=K
 class NiuniuCard {
   final NiuniuSuit suit;
@@ -13,7 +13,7 @@ class NiuniuCard {
 
   const NiuniuCard({required this.suit, required this.rank});
 
-  /// 牛牛计算点值：J/Q/K/10 均为 10，其余为 rank
+  /// 斗牛计算点值：J/Q/K/10 均为 10，其余为 rank
   int get pointValue {
     if (rank >= 10) return 10;
     return rank;

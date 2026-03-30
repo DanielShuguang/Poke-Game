@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:poke_game/domain/niuniu/entities/niuniu_game_config.dart';
 import 'package:poke_game/domain/niuniu/entities/niuniu_player.dart';
 
-/// 牛牛 AI
+/// 斗牛 AI
 ///
 /// 负责单机模式下闲家的自动下注。
 class NiuniuAi {

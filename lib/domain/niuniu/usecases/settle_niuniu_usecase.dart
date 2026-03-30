@@ -1,6 +1,6 @@
 import 'package:poke_game/domain/niuniu/entities/niuniu_game_state.dart';
 
-/// 牛牛结算 UseCase
+/// 斗牛结算 UseCase
 ///
 /// 将每位闲家手牌与庄家比较，按倍率结算筹码。
 /// 结算后 player.betAmount 存储净盈亏（正=赢，负=输），供 UI 展示。

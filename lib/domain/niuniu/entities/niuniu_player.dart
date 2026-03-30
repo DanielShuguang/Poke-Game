@@ -13,7 +13,7 @@ enum NiuniuPlayerStatus {
   broke, // 筹码为0，跳过本局
 }
 
-/// 牛牛玩家
+/// 斗牛玩家
 class NiuniuPlayer {
   final String id;
   final String name;

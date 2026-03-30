@@ -1,7 +1,7 @@
 import 'package:poke_game/domain/niuniu/entities/niuniu_card.dart';
 import 'package:poke_game/domain/niuniu/entities/niuniu_player.dart';
 
-/// 牛牛游戏阶段
+/// 斗牛游戏阶段
 enum NiuniuPhase {
   /// 下注阶段
   betting,
@@ -16,7 +16,7 @@ enum NiuniuPhase {
   settlement,
 }
 
-/// 牛牛游戏全局状态
+/// 斗牛游戏全局状态
 class NiuniuGameState {
   /// 当前牌堆（剩余牌，Host 维护）
   final List<NiuniuCard> deck;

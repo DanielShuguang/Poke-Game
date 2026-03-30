@@ -53,7 +53,7 @@ List<GameInfo> _getMockGames() {
     ),
     const GameInfo(
       id: 'niuniu',
-      name: '牛牛',
+      name: '斗牛',
       description: '比牌博弈，支持人机对战',
       icon: '🐂',
       status: GameStatus.available,

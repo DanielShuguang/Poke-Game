@@ -29,7 +29,7 @@ enum GameType {
   /// 21点
   blackjack,
 
-  /// 牛牛
+  /// 斗牛
   niuniu,
 }
 
@@ -47,7 +47,7 @@ extension GameTypeX on GameType {
       case GameType.blackjack:
         return '21点';
       case GameType.niuniu:
-        return '牛牛';
+        return '斗牛';
     }
   }
 

@@ -62,6 +62,29 @@ class _BlackjackPageState extends ConsumerState<BlackjackPage>
     super.dispose();
   }
 
+  Future<void> _confirmExit(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('退出游戏'),
+        content: const Text('确定要退出当前游戏吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('退出', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      Navigator.pop(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameState = ref.watch(blackjackGameProvider);
@@ -117,6 +140,10 @@ class _BlackjackPageState extends ConsumerState<BlackjackPage>
       appBar: AppBar(
         backgroundColor: const Color(0xFF1B5E20),
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white70),
+          onPressed: () => _confirmExit(context),
+        ),
         title: const Text('21 点'),
         actions: [
           if (gameState.phase == BlackjackPhase.betting)

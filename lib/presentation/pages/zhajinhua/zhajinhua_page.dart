@@ -154,8 +154,8 @@ class _ZhajinhuaPageState extends ConsumerState<ZhajinhuaPage> {
               top: 8,
               left: 8,
               child: IconButton(
-                icon: const Icon(Icons.arrow_back_ios, color: Colors.white70),
-                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.arrow_back, color: Colors.white70),
+                onPressed: () => _confirmExit(context),
               ),
             ),
             // 等待提示（单机：AI 思考中；联机：等待其他玩家）
@@ -175,5 +175,28 @@ class _ZhajinhuaPageState extends ConsumerState<ZhajinhuaPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmExit(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('退出游戏'),
+        content: const Text('确定要退出当前游戏吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('退出', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      Navigator.pop(context);
+    }
   }
 }

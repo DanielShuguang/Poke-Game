@@ -10,7 +10,7 @@ abstract class _NiuniuMessageType {
   static const stateSync = 'niuniu_state';
 }
 
-/// 牛牛网络适配器
+/// 斗牛网络适配器
 ///
 /// Host：接收 Client 下注行动 → 验证 → 执行 → 广播新状态。
 /// Client：发送行动给 Host，接收状态广播更新本地 UI。

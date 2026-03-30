@@ -1,6 +1,6 @@
 import 'package:poke_game/domain/niuniu/entities/niuniu_card.dart';
 
-/// 牛牛牌型等级（从低到高）
+/// 斗牛牌型等级（从低到高）
 enum NiuniuRank {
   noPoints, // 无牛
   niu1,
@@ -73,7 +73,7 @@ extension NiuniuRankX on NiuniuRank {
   }
 }
 
-/// 牛牛手牌（持有 5 张牌）
+/// 斗牛手牌（持有 5 张牌）
 class NiuniuHand {
   final List<NiuniuCard> cards;
 
