@@ -25,6 +25,9 @@ enum GameType {
 
   /// 炸金花（预留）
   zhajinhua,
+
+  /// 21点
+  blackjack,
 }
 
 /// 游戏类型扩展
@@ -38,6 +41,8 @@ extension GameTypeX on GameType {
         return '德州扑克';
       case GameType.zhajinhua:
         return '炸金花';
+      case GameType.blackjack:
+        return '21点';
     }
   }
 
@@ -48,6 +53,7 @@ extension GameTypeX on GameType {
         return 3;
       case GameType.texasHoldem:
       case GameType.zhajinhua:
+      case GameType.blackjack:
         return null; // 可变人数
     }
   }
@@ -61,6 +67,8 @@ extension GameTypeX on GameType {
         return 2;
       case GameType.zhajinhua:
         return 2;
+      case GameType.blackjack:
+        return 2;
     }
   }
 
@@ -73,6 +81,8 @@ extension GameTypeX on GameType {
         return 9;
       case GameType.zhajinhua:
         return 6;
+      case GameType.blackjack:
+        return 7;
     }
   }
 

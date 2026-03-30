@@ -257,6 +257,21 @@ class GameRulesPage extends StatelessWidget {
             Text('4. 牌型：豹子 > 同花顺 > 同花 > 顺子 > 对子 > 散牌'),
           ],
         );
+      case GameType.blackjack:
+        return const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('1. 目标：手牌点数尽量接近21点但不超过'),
+            SizedBox(height: 8),
+            Text('2. 点数：A=1或11，J/Q/K=10，其余按面值'),
+            SizedBox(height: 8),
+            Text('3. 操作：Hit摸牌、Stand停牌、Double加倍、Split分牌、Surrender投降'),
+            SizedBox(height: 8),
+            Text('4. 庄家：点数≤16必须摸牌，≥17停牌（Hard 17规则）'),
+            SizedBox(height: 8),
+            Text('5. 赔率：Blackjack赔1.5倍，普通胜赔1倍，平局返还'),
+          ],
+        );
     }
   }
 }

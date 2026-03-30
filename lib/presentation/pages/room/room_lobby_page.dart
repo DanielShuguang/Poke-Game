@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
+import 'package:poke_game/core/network/blackjack_network_adapter.dart';
 import 'package:poke_game/core/network/holdem_network_adapter.dart';
 import 'package:poke_game/core/network/network_environment_checker.dart';
 import 'package:poke_game/core/network/room_http_server.dart';
@@ -17,6 +18,8 @@ import 'package:poke_game/presentation/pages/texas_holdem/holdem_game_page.dart'
 import 'package:poke_game/presentation/pages/texas_holdem/holdem_provider.dart';
 import 'package:poke_game/presentation/pages/zhajinhua/providers/zhj_game_provider.dart';
 import 'package:poke_game/presentation/pages/zhajinhua/zhajinhua_page.dart';
+import 'package:poke_game/presentation/pages/blackjack/blackjack_page.dart';
+import 'package:poke_game/presentation/pages/blackjack/providers/blackjack_game_notifier.dart';
 
 /// 等待大厅状态
 class LobbyState {
@@ -714,6 +717,19 @@ class _RoomLobbyPageState extends ConsumerState<RoomLobbyPage> {
         adapter.start();
         Navigator.of(context).push(MaterialPageRoute(
           builder: (_) => ZhajinhuaPage(isOnline: true, networkAdapter: adapter),
+        ));
+      case GameType.blackjack:
+        final bjNotifier = ref.read(blackjackGameProvider.notifier);
+        final adapter = BlackjackNetworkAdapter(
+          incomingStream: incomingStream,
+          broadcastFn: broadcastFn,
+          notifier: bjNotifier,
+          isHost: isHost,
+          localPlayerId: localPlayerId,
+        );
+        adapter.start();
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => BlackjackPage(isOnline: true, networkAdapter: adapter),
         ));
       case GameType.doudizhu:
         context.push('/doudizhu');

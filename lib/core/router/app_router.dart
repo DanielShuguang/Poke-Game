@@ -9,6 +9,7 @@ import 'package:poke_game/presentation/pages/room/room_lobby_page.dart';
 import 'package:poke_game/presentation/pages/texas_holdem/holdem_lobby_page.dart';
 import 'package:poke_game/presentation/pages/texas_holdem/holdem_game_page.dart';
 import 'package:poke_game/presentation/pages/zhajinhua/zhajinhua_page.dart';
+import 'package:poke_game/presentation/pages/blackjack/blackjack_page.dart';
 
 /// 应用路由配置
 final GoRouter appRouter = GoRouter(
@@ -69,6 +70,12 @@ final GoRouter appRouter = GoRouter(
       name: 'zhajinhua',
       builder: (BuildContext context, GoRouterState state) =>
           const ZhajinhuaPage(),
+    ),
+    GoRoute(
+      path: '/blackjack',
+      name: 'blackjack',
+      builder: (BuildContext context, GoRouterState state) =>
+          const BlackjackPage(),
     ),
   ],
   errorBuilder: (BuildContext context, GoRouterState state) =>

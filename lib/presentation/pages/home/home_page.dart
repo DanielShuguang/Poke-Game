@@ -186,9 +186,9 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  /// 是否支持联机对战（斗地主、德州扑克、炸金花）
+  /// 是否支持联机对战（斗地主、德州扑克、炸金花、21点）
   bool _supportsOnline(String gameId) {
-    return gameId == 'doudizhu' || gameId == 'texas-holdem' || gameId == 'zhajinhua';
+    return gameId == 'doudizhu' || gameId == 'texas-holdem' || gameId == 'zhajinhua' || gameId == 'blackjack';
   }
 
   void _handleGameTap(BuildContext context, GameInfo game) {

@@ -38,7 +38,7 @@ List<GameInfo> _getMockGames() {
       name: '21点',
       description: '经典21点扑克游戏',
       icon: '🂡',
-      status: GameStatus.comingSoon,
+      status: GameStatus.available,
       category: GameCategory.cardGames,
       route: '/blackjack',
     ),
