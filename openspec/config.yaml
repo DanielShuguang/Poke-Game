@@ -1,42 +1,57 @@
 schema: spec-driven
 
-# 项目上下文（可选）
-# 在创建工件时向 AI 显示此信息。
-# 添加您的技术栈、约定、风格指南、领域知识等。
-# 示例：
-#   context: |
-#     技术栈：TypeScript, React, Node.js
-#     我们使用约定式提交
-#     领域：电商平台
 context: |
   技术栈：Flutter 3.x, Dart SDK ^3.6.1
   UI框架：Material Design 3 (Material You)
   目标平台：Android, iOS, Web, Windows, macOS, Linux
-  架构模式：推荐使用 Clean Architecture 或 MVVM
-  状态管理：可根据需求选择 Provider、Riverpod、Bloc 等
+  架构模式：Clean Architecture（domain/data/presentation 三层）
+  状态管理：flutter_riverpod（StateNotifierProvider + ConsumerStatefulWidget）
+  路由：GoRouter（声明式路由，/game、/room/scan、/room/create、/room/lobby）
   领域：扑克游戏合集移动应用
-  游戏类型：包含但不限于德州扑克、21点、斗地主、炸金花等经典扑克游戏
-  核心功能：游戏房间、多人对战、AI对手、积分系统、排行榜
 
-# 每个工件的规则（可选）
-# 为特定工件添加自定义规则。
-# 示例：
-#   rules:
-#     proposal:
-#       - 保持提案在500字以内
-#       - 始终包含"非目标"部分
-#     tasks:
-#       - 将任务分解为最多2小时的块
+  已上线游戏（全部支持单机 AI + 局域网联机）：
+  - 斗地主（/doudizhu）：3人，叫地主/出牌/判胜负
+  - 德州扑克（/texas-holdem）：2-9人现金局
+  - 炸金花（/zhajinhua）：2-6人，三张牌博弈
+  - 21点（/blackjack）：1-7人，Hard 17规则
+  - 斗牛（/niuniu）：2-6人，C(5,3)判牛，倍率结算
+
+  局域网联机架构（Host/Client 适配器模式）：
+  - 每款游戏有对应 XxxNetworkAdapter（lib/core/network/）
+  - 构造参数：incomingStream, broadcastFn, notifier, isHost, localPlayerId
+  - Host 执行行动 → 广播状态；Client 发送行动 → 等待同步
+  - showdown 前 toJson(includeAllCards: false) 隐藏他人手牌
+  - 35秒超时 → Host 代为执行最小操作（forceXxx 方法）
+
+  新增游戏必改文件（共7处）：
+  1. domain/lan/entities/room_info.dart（GameType枚举 + switch分支）
+  2. domain/lan/entities/room_info.g.dart / room.g.dart（序列化映射）
+  3. core/router/app_router.dart（路由注册）
+  4. presentation/pages/home/home_provider.dart（游戏卡片）
+  5. presentation/pages/home/home_page.dart（_supportsOnline列表）
+  6. presentation/pages/room/room_lobby_page.dart（_navigateToGame switch）
+  7. presentation/pages/room/game_rules_page.dart（_getRulesContent switch）
+
+  UI规范：
+  - 退出按钮统一：左上角 IconButton(Icons.arrow_back, white70) + 确认弹窗 + Navigator.pop
+  - 横屏游戏：initState 锁定横屏，dispose 时恢复
+
 rules:
+  code:
+    - 单个文件不超过 500 行；超出时应拆分为多个职责单一的文件
+    - 单个方法/函数不超过 100 行；超出时应提取为私有辅助方法
   proposal:
-    - 提案应明确游戏规则和交互流程
-    - 包含UI/UX设计要点
-    - 考虑多人游戏的网络同步方案
+    - 明确游戏规则和牌型定义（数据结构、胜负判定、倍率计算）
+    - 说明单机 AI 策略要点
+    - 说明联机行动消息格式（参考 XxxNetworkAction 模式）
+    - 包含 UI/UX 设计要点（横屏布局、动画时序）
   tasks:
-    - 每个任务应可独立测试
-    - 优先实现核心游戏逻辑
-    - UI实现应考虑多平台适配
+    - 每个任务应可独立测试，优先实现核心游戏逻辑
+    - 分层顺序：entities → usecases → AI → notifier → 网络适配器 → UI → 路由接入
+    - 单元测试覆盖引擎核心逻辑（判牌、结算）和 AI 下注范围
+    - UI 实现应考虑多平台横屏适配
   spec:
-    - 明确卡牌数据结构
-    - 定义游戏状态机
-    - 说明动画和交互细节
+    - 明确卡牌数据结构和点值计算规则
+    - 定义游戏状态机（阶段枚举 + 合法转换）
+    - 说明手牌隐私策略（toJson includeAllCards 参数）
+    - 说明动画时序和交互细节

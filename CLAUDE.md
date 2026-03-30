@@ -81,6 +81,8 @@ lib/core/network/
 ## 开发规范
 
 - 代码风格：`flutter analyze`，Effective Dart，snake_case 文件名，PascalCase 类名
+- 文件大小：单个 `.dart` 文件不超过 **500 行**；超出时拆分为职责单一的文件
+- 函数长度：单个方法/函数不超过 **100 行**；超出时提取为私有辅助方法
 - 状态管理：flutter_riverpod（StateNotifierProvider + ConsumerWidget）
 - 提交格式：`type(scope): description`（feat/fix/refactor/docs/test/chore）
 
