@@ -6,7 +6,6 @@ import 'package:poke_game/presentation/pages/settings/settings_page.dart';
 import 'package:poke_game/presentation/pages/room/room_scan_page.dart';
 import 'package:poke_game/presentation/pages/room/create_room_page.dart';
 import 'package:poke_game/presentation/pages/room/room_lobby_page.dart';
-import 'package:poke_game/presentation/pages/texas_holdem/holdem_lobby_page.dart';
 import 'package:poke_game/presentation/pages/texas_holdem/holdem_game_page.dart';
 import 'package:poke_game/presentation/pages/zhajinhua/zhajinhua_page.dart';
 import 'package:poke_game/presentation/pages/blackjack/blackjack_page.dart';
@@ -58,12 +57,6 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/texas-holdem',
       name: 'texas-holdem',
-      builder: (BuildContext context, GoRouterState state) =>
-          const HoldemLobbyPage(),
-    ),
-    GoRoute(
-      path: '/texas-holdem/game',
-      name: 'texas-holdem-game',
       builder: (BuildContext context, GoRouterState state) =>
           const HoldemGamePage(),
     ),

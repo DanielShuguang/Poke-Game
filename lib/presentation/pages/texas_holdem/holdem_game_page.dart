@@ -36,10 +36,12 @@ class _HoldemGamePageState extends ConsumerState<HoldemGamePage> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-    // 开始游戏
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(holdemGameProvider.notifier).startGame();
-    });
+    // 联机模式下自动开始；单机模式等待玩家点击开始
+    if (widget.isOnline) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(holdemGameProvider.notifier).startGame();
+      });
+    }
   }
 
   @override
@@ -118,6 +120,9 @@ class _HoldemGamePageState extends ConsumerState<HoldemGamePage> {
             ),
             // 摊牌结果遮罩
             if (state.phase == GamePhase.finished) _ShowdownOverlay(state: state),
+            // 单机等待开始遮罩
+            if (state.phase == GamePhase.waiting && !widget.isOnline)
+              const _WaitingOverlay(),
           ],
         ),
       ),
@@ -289,5 +294,58 @@ class _ShowdownOverlay extends StatelessWidget {
 extension on _HoldemGamePageState {
   void _startNextRound() {
     ref.read(holdemGameProvider.notifier).nextRound();
+  }
+
+  void _startGame() {
+    ref.read(holdemGameProvider.notifier).startGame();
+  }
+}
+
+class _WaitingOverlay extends StatelessWidget {
+  const _WaitingOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: Container(
+        color: Colors.black54,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                '德州扑克',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '现金局 · AI 对战',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                onPressed: () => context
+                    .findAncestorStateOfType<_HoldemGamePageState>()
+                    ?._startGame(),
+                icon: const Icon(Icons.play_arrow),
+                label: const Text('开始游戏'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2E7D32),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 32, vertical: 14),
+                  textStyle: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
