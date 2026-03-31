@@ -60,6 +60,7 @@ dependencies:
   # UI组件
   flutter_screenutil: ^5.9.3
   cached_network_image: ^3.4.1
+  google_fonts: ^6.2.1
 
   # 序列化
   json_annotation: ^4.9.0

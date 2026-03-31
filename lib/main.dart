@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:poke_game/core/router/app_router.dart';
 import 'package:poke_game/presentation/pages/settings/settings_provider.dart';
@@ -47,6 +48,7 @@ class MyApp extends ConsumerWidget {
           brightness: Brightness.light,
         ),
         useMaterial3: true,
+        textTheme: GoogleFonts.notoSansScTextTheme(ThemeData.light().textTheme),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
           elevation: 0,
@@ -58,6 +60,7 @@ class MyApp extends ConsumerWidget {
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
+        textTheme: GoogleFonts.notoSansScTextTheme(ThemeData.dark().textTheme),
       ),
       themeMode: themeMode,
       routerConfig: appRouter,
