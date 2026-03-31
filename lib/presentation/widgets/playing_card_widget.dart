@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:poke_game/domain/doudizhu/entities/card.dart' as game;
+import 'package:poke_game/presentation/shared/game_colors.dart';
 
 /// 卡牌组件
 class CardWidget extends StatefulWidget {
@@ -64,7 +65,13 @@ class _CardWidgetState extends State<CardWidget>
 
   @override
   Widget build(BuildContext context) {
-    // 确定边框颜色
+    // 正常状态下按花色区分边框
+    final normalBorderColor = widget.card.isBigJoker
+        ? GameColors.cardBorderGold
+        : widget.card.isRed
+            ? GameColors.cardBorderRed
+            : GameColors.cardBorderBlack;
+
     Color borderColor;
     double borderWidth;
     Color shadowColor;
@@ -72,27 +79,27 @@ class _CardWidgetState extends State<CardWidget>
     double shadowOffset;
 
     if (widget.isSelected) {
-      borderColor = Colors.green;
+      borderColor = GameColors.cardSelectedGlow;
       borderWidth = 2;
-      shadowColor = Colors.green.withValues(alpha: 0.4);
-      blurRadius = 8;
+      shadowColor = GameColors.cardSelectedGlow.withValues(alpha: 0.5);
+      blurRadius = 10;
       shadowOffset = 4;
     } else if (widget.isPreview) {
-      borderColor = Colors.blue;
+      borderColor = GameColors.cardSelectedGlow.withValues(alpha: 0.7);
       borderWidth = 2;
-      shadowColor = Colors.blue.withValues(alpha: 0.3);
+      shadowColor = GameColors.cardSelectedGlow.withValues(alpha: 0.3);
       blurRadius = 8;
       shadowOffset = 2;
     } else if (widget.isHint) {
-      borderColor = Colors.amber;
+      borderColor = GameColors.accentAmber;
       borderWidth = 2;
-      shadowColor = Colors.amber.withValues(alpha: 0.3);
+      shadowColor = GameColors.accentAmber.withValues(alpha: 0.3);
       blurRadius = 8;
       shadowOffset = 2;
     } else {
-      borderColor = Colors.grey.shade300;
+      borderColor = normalBorderColor;
       borderWidth = 1;
-      shadowColor = Colors.black.withValues(alpha: 0.1);
+      shadowColor = Colors.black.withValues(alpha: 0.3);
       blurRadius = 4;
       shadowOffset = 2;
     }
@@ -112,16 +119,21 @@ class _CardWidgetState extends State<CardWidget>
             width: widget.width ?? 48,
             height: widget.height ?? 68,
             decoration: BoxDecoration(
-              color: widget.faceUp ? Colors.white : Colors.blue.shade700,
+              gradient: widget.faceUp
+                  ? const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [GameColors.cardBg1, GameColors.cardBg2],
+                    )
+                  : null,
+              color: widget.faceUp ? null : GameColors.cardBackBg,
               borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: borderColor,
-                width: borderWidth,
-              ),
+              border: Border.all(color: borderColor, width: borderWidth),
               boxShadow: [
                 BoxShadow(
                   color: shadowColor,
                   blurRadius: blurRadius,
+                  spreadRadius: borderWidth > 1 ? 1 : 0,
                   offset: Offset(0, shadowOffset),
                 ),
               ],
@@ -150,29 +162,101 @@ class _CardWidgetState extends State<CardWidget>
   }
 
   Widget _buildCardFace() {
-    // 根据卡片大小调整字体
     final isSmall = (widget.width ?? 48) < 40;
-    final suitSize = isSmall ? 14.0 : 22.0;
-    final textSize = isSmall ? 11.0 : 16.0;
+    final smallFontSize = isSmall ? 9.0 : 11.0;
+    final largeFontSize = isSmall ? 16.0 : 22.0;
+    final cardColor = widget.card.isRed
+        ? GameColors.cardBorderRed
+        : GameColors.textPrimary;
+    final suitText = widget.card.suitSymbol;
+    final rankText = widget.card.displayText;
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    if (widget.card.isJoker) {
+      final jokerColor = widget.card.isBigJoker
+          ? GameColors.cardBorderGold
+          : GameColors.cardBorderBlack;
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(suitText, style: TextStyle(fontSize: isSmall ? 14 : 20)),
+            SizedBox(height: isSmall ? 2 : 4),
+            Text(
+              rankText,
+              style: TextStyle(
+                fontSize: isSmall ? 9 : 11,
+                fontWeight: FontWeight.bold,
+                color: jokerColor,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: EdgeInsets.all(isSmall ? 2 : 3),
+      child: Stack(
         children: [
-          Text(
-            widget.card.suitSymbol,
-            style: TextStyle(
-              fontSize: suitSize,
-              color: widget.card.isRed ? Colors.red : Colors.black,
+          Positioned(
+            top: 0,
+            left: 0,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  rankText,
+                  style: TextStyle(
+                    fontSize: smallFontSize,
+                    fontWeight: FontWeight.bold,
+                    color: cardColor,
+                    height: 1.1,
+                  ),
+                ),
+                Text(
+                  suitText,
+                  style: TextStyle(
+                    fontSize: smallFontSize,
+                    color: cardColor,
+                    height: 1.0,
+                  ),
+                ),
+              ],
             ),
           ),
-          SizedBox(height: isSmall ? 1 : 2),
-          Text(
-            widget.card.displayText,
-            style: TextStyle(
-              fontSize: textSize,
-              fontWeight: FontWeight.bold,
-              color: widget.card.isRed ? Colors.red : Colors.black,
+          Center(
+            child: Text(
+              suitText,
+              style: TextStyle(fontSize: largeFontSize, color: cardColor),
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Transform.rotate(
+              angle: 3.14159,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    rankText,
+                    style: TextStyle(
+                      fontSize: smallFontSize,
+                      fontWeight: FontWeight.bold,
+                      color: cardColor,
+                      height: 1.1,
+                    ),
+                  ),
+                  Text(
+                    suitText,
+                    style: TextStyle(
+                      fontSize: smallFontSize,
+                      color: cardColor,
+                      height: 1.0,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -182,15 +266,12 @@ class _CardWidgetState extends State<CardWidget>
 
   Widget _buildCardBack() {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.blue.shade800,
-        borderRadius: BorderRadius.circular(4),
+      decoration: const BoxDecoration(
+        color: GameColors.cardBackBg,
+        borderRadius: BorderRadius.all(Radius.circular(4)),
       ),
       child: const Center(
-        child: Text(
-          '🂠',
-          style: TextStyle(fontSize: 24),
-        ),
+        child: Text('🂠', style: TextStyle(fontSize: 24, color: GameColors.cardBorderBlack)),
       ),
     );
   }
