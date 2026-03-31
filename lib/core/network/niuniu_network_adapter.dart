@@ -50,6 +50,11 @@ class NiuniuNetworkAdapter {
     broadcastFn({'type': _NiuniuMessageType.action, 'data': action.toJson()});
   }
 
+  /// Host 主动广播当前状态（如庄家点击"开始发牌"后调用）
+  void broadcastCurrentState() {
+    _broadcastState();
+  }
+
   void _handleMessage(Map<String, dynamic> msg) {
     try {
       final type = msg['type'] as String?;

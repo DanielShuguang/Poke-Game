@@ -50,10 +50,8 @@ class NiuniuGameNotifier extends StateNotifier<NiuniuGameState> {
     final newPlayers = List.of(state.players)..[idx] = updated;
     state = state.copyWith(players: newPlayers);
 
-    // 所有闲家下注完成后自动发牌
-    final newState = state.copyWith(players: newPlayers);
-    state = newState;
-    if (newState.allPuntersBet) {
+    // 庄家是 AI 时自动发牌；庄家是人类时等待其点击"开始发牌"
+    if (state.allPuntersBet && (state.banker?.isAi == true)) {
       startGame();
     }
   }

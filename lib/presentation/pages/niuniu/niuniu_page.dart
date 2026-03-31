@@ -276,12 +276,39 @@ class _NiuniuPageState extends ConsumerState<NiuniuPage> {
     final chips = localPlayer?.chips ?? 0;
 
     if (!isMyTurn) {
+      // 庄家：所有闲家下注完毕后显示"开始发牌"按钮
+      if (gameState.allPuntersBet &&
+          localPlayer?.id == gameState.bankerId) {
+        return Container(
+          color: Colors.black45,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Center(
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.play_circle_outline),
+              label: const Text('开始发牌',
+                  style: TextStyle(fontSize: 16, color: Colors.white)),
+              onPressed: () {
+                ref.read(niuniuGameProvider.notifier).startGame();
+                // 联机模式下广播 showdown 状态给所有客户端
+                if (widget.isOnline && widget.networkAdapter?.isHost == true) {
+                  widget.networkAdapter!.broadcastCurrentState();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green.shade700,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              ),
+            ),
+          ),
+        );
+      }
+      final waitingMsg = gameState.allPuntersBet ? '等待庄家发牌...' : '等待其他玩家下注...';
       return Container(
         color: Colors.black38,
         padding: const EdgeInsets.all(12),
-        child: const Center(
-          child: Text('等待其他玩家下注...',
-              style: TextStyle(color: Colors.white70)),
+        child: Center(
+          child: Text(waitingMsg, style: const TextStyle(color: Colors.white70)),
         ),
       );
     }
