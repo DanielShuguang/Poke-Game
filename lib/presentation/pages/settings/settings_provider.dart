@@ -38,7 +38,7 @@ class SettingsState {
     this.soundEnabled = true,
     this.musicEnabled = true,
     this.vibrationEnabled = true,
-    this.themeMode = ThemeModeSetting.system,
+    this.themeMode = ThemeModeSetting.dark,
     this.languageCode = 'zh',
     this.playerName = '玩家',
     this.avatarIndex = 0,
@@ -92,7 +92,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     final themeModeString = _prefs.getString(_keyThemeMode) ?? 'system';
     final themeMode = ThemeModeSetting.values.firstWhere(
       (e) => e.name == themeModeString,
-      orElse: () => ThemeModeSetting.system,
+      orElse: () => ThemeModeSetting.dark,
     );
 
     state = SettingsState(

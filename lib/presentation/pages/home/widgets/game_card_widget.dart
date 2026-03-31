@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:poke_game/domain/game/entities/game_info.dart';
+import 'package:poke_game/presentation/shared/game_colors.dart';
 
 /// 游戏卡片组件
 class GameCardWidget extends StatelessWidget {
@@ -20,6 +21,7 @@ class GameCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
+      color: GameColors.bgSurface,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -31,7 +33,7 @@ class GameCardWidget extends StatelessWidget {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
+                  color: GameColors.primaryGreen.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
@@ -52,9 +54,11 @@ class GameCardWidget extends StatelessWidget {
                         Expanded(
                           child: Text(
                             game.name,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: GameColors.textPrimary,
+                            ),
                           ),
                         ),
                         _buildStatusBadge(context),
@@ -63,9 +67,10 @@ class GameCardWidget extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       game.description,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: GameColors.textSecondary,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -78,6 +83,7 @@ class GameCardWidget extends StatelessWidget {
                           icon: const Icon(Icons.wifi, size: 14),
                           label: const Text('联机对战'),
                           style: TextButton.styleFrom(
+                            foregroundColor: GameColors.primaryGreen,
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 2),
                             minimumSize: Size.zero,
@@ -92,10 +98,10 @@ class GameCardWidget extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               // 箭头图标
-              Icon(
+              const Icon(
                 Icons.arrow_forward_ios,
                 size: 16,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: GameColors.textSecondary,
               ),
             ],
           ),

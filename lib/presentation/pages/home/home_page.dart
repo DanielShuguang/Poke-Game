@@ -15,7 +15,10 @@ class HomePage extends ConsumerWidget {
     final gamesAsync = ref.watch(gamesProvider);
 
     return Scaffold(
+      backgroundColor: GameColors.bgBase,
       appBar: AppBar(
+        backgroundColor: GameColors.bgBase,
+        foregroundColor: GameColors.textPrimary,
         title: const Text('扑克游戏合集'),
         actions: [
           IconButton(
@@ -148,6 +151,7 @@ class HomePage extends ConsumerWidget {
                       '局域网对战',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: GameColors.textPrimary,
                           ),
                     ),
                     const SizedBox(height: 4),
@@ -176,6 +180,7 @@ class HomePage extends ConsumerWidget {
       title,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
+            color: GameColors.textSecondary,
           ),
     );
   }
