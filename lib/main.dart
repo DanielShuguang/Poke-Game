@@ -44,7 +44,7 @@ class MyApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.teal,
+          seedColor: const Color(0xFF4ADE80),
           brightness: Brightness.light,
         ),
         useMaterial3: true,
@@ -56,9 +56,10 @@ class MyApp extends ConsumerWidget {
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.teal,
+          seedColor: const Color(0xFF4ADE80),
           brightness: Brightness.dark,
         ),
+        scaffoldBackgroundColor: const Color(0xFF0F0F0F),
         useMaterial3: true,
         textTheme: GoogleFonts.notoSansScTextTheme(ThemeData.dark().textTheme),
       ),
