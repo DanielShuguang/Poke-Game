@@ -16,6 +16,8 @@ import 'package:poke_game/presentation/pages/shengji/widgets/call_trump_dialog.d
 import 'package:poke_game/presentation/pages/shengji/widgets/game_result_dialog.dart';
 import 'package:poke_game/presentation/pages/shengji/widgets/player_seat.dart';
 import 'package:poke_game/presentation/pages/shengji/widgets/score_board.dart';
+import 'package:poke_game/presentation/shared/game_colors.dart';
+import 'package:poke_game/presentation/shared/widgets/game_back_button.dart';
 
 class ShengjiPage extends ConsumerStatefulWidget {
   final bool isOnline;
@@ -188,7 +190,7 @@ class _ShengjiPageState extends ConsumerState<ShengjiPage> {
     final localPlayer = gameState.players.where((p) => p.id == localId).firstOrNull;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1B5E20),
+      backgroundColor: GameColors.bgTable,
       body: Stack(
         children: [
           // 主游戏区域
@@ -241,10 +243,7 @@ class _ShengjiPageState extends ConsumerState<ShengjiPage> {
       child: Row(
         children: [
           // 返回按钮
-          IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white70),
-            onPressed: () => _showExitConfirmDialog(context),
-          ),
+          GameBackButton(onPressed: () => _showExitConfirmDialog(context)),
           // 将牌信息
           if (gameState.trumpInfo != null)
             Container(
@@ -363,8 +362,8 @@ class _ShengjiPageState extends ConsumerState<ShengjiPage> {
                   const SizedBox(width: 12),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange.shade700,
-                      foregroundColor: Colors.white,
+                      backgroundColor: GameColors.primaryGreen,
+                      foregroundColor: const Color(0xFF0F0F0F),
                       minimumSize: const Size(60, 30),
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -375,8 +374,8 @@ class _ShengjiPageState extends ConsumerState<ShengjiPage> {
                   const SizedBox(width: 8),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue.shade600,
-                      foregroundColor: Colors.white,
+                      backgroundColor: GameColors.bgSurface,
+                      foregroundColor: GameColors.primaryGreen,
                       minimumSize: const Size(60, 30),
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,

@@ -12,6 +12,8 @@ import 'package:poke_game/presentation/pages/doudizhu/widgets/center_play_area_w
 import 'package:poke_game/presentation/pages/doudizhu/widgets/hand_cards_widget.dart';
 import 'package:poke_game/presentation/pages/doudizhu/widgets/landlord_cards_widget.dart';
 import 'package:poke_game/presentation/pages/doudizhu/widgets/player_area_widget.dart';
+import 'package:poke_game/presentation/shared/game_colors.dart';
+import 'package:poke_game/presentation/shared/widgets/game_back_button.dart';
 
 /// 斗地主游戏页面
 class DoudizhuGamePage extends ConsumerStatefulWidget {
@@ -87,6 +89,7 @@ class _DoudizhuGamePageState extends ConsumerState<DoudizhuGamePage> {
         }
       },
       child: Scaffold(
+        backgroundColor: GameColors.bgTable,
         body: Stack(
           children: [
             // 主内容
@@ -100,14 +103,7 @@ class _DoudizhuGamePageState extends ConsumerState<DoudizhuGamePage> {
               top: 8,
               left: 8,
               child: SafeArea(
-                child: IconButton(
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.black45,
-                    foregroundColor: Colors.white,
-                  ),
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => _confirmExit(context),
-                ),
+                child: GameBackButton(onPressed: () => _confirmExit(context)),
               ),
             ),
           ],

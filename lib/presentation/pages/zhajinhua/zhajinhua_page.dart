@@ -8,6 +8,8 @@ import 'package:poke_game/presentation/pages/zhajinhua/providers/zhj_game_provid
 import 'package:poke_game/presentation/pages/zhajinhua/widgets/zhj_betting_panel.dart';
 import 'package:poke_game/presentation/pages/zhajinhua/widgets/zhj_settlement_dialog.dart';
 import 'package:poke_game/presentation/pages/zhajinhua/widgets/zhj_table_widget.dart';
+import 'package:poke_game/presentation/shared/game_colors.dart';
+import 'package:poke_game/presentation/shared/widgets/game_back_button.dart';
 
 class ZhajinhuaPage extends ConsumerStatefulWidget {
   /// 是否为联机模式
@@ -126,7 +128,7 @@ class _ZhajinhuaPageState extends ConsumerState<ZhajinhuaPage> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: GameColors.bgBase,
       body: SafeArea(
         child: Stack(
           children: [
@@ -153,10 +155,7 @@ class _ZhajinhuaPageState extends ConsumerState<ZhajinhuaPage> {
             Positioned(
               top: 8,
               left: 8,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white70),
-                onPressed: () => _confirmExit(context),
-              ),
+              child: GameBackButton(onPressed: () => _confirmExit(context)),
             ),
             // 等待提示（单机：AI 思考中；联机：等待其他玩家）
             if (gameState.phase == ZhjGamePhase.betting && !isMyTurn)

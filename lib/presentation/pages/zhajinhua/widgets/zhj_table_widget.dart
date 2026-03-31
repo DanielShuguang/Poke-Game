@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:poke_game/domain/zhajinhua/entities/zhj_game_state.dart';
 import 'package:poke_game/domain/zhajinhua/entities/zhj_player.dart';
+import 'package:poke_game/presentation/shared/game_colors.dart';
 import 'zhj_player_widget.dart';
 import 'zhj_pot_display.dart';
 
@@ -25,11 +26,11 @@ class ZhjTableWidget extends StatelessWidget {
 
     return Stack(
       children: [
-        // 绿色桌面背景
+        // 桌面背景
         Container(
           decoration: const BoxDecoration(
             gradient: RadialGradient(
-              colors: [Color(0xFF2E7D32), Color(0xFF1B5E20)],
+              colors: [GameColors.bgTable, GameColors.bgBase],
               radius: 1.2,
             ),
           ),

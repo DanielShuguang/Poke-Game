@@ -8,6 +8,8 @@ import 'package:poke_game/presentation/pages/texas_holdem/holdem_provider.dart';
 import 'package:poke_game/presentation/pages/texas_holdem/widgets/community_cards_widget.dart';
 import 'package:poke_game/presentation/pages/texas_holdem/widgets/player_seat_widget.dart';
 import 'package:poke_game/presentation/pages/texas_holdem/widgets/betting_action_widget.dart';
+import 'package:poke_game/presentation/shared/game_colors.dart';
+import 'package:poke_game/presentation/shared/widgets/game_back_button.dart';
 
 /// 德州扑克游戏页面
 class HoldemGamePage extends ConsumerStatefulWidget {
@@ -78,7 +80,7 @@ class _HoldemGamePageState extends ConsumerState<HoldemGamePage> {
   Widget build(BuildContext context) {
     final state = ref.watch(holdemGameProvider);
     return Scaffold(
-      backgroundColor: const Color(0xFF1A5C35), // 扑克绿色桌面
+      backgroundColor: GameColors.bgTable, // 扑克绿色桌面
       body: SafeArea(
         child: Stack(
           children: [
@@ -112,10 +114,7 @@ class _HoldemGamePageState extends ConsumerState<HoldemGamePage> {
               top: 8,
               left: 8,
               child: SafeArea(
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white70),
-                  onPressed: _confirmExit,
-                ),
+                child: GameBackButton(onPressed: _confirmExit),
               ),
             ),
             // 摊牌结果遮罩
@@ -334,8 +333,8 @@ class _WaitingOverlay extends StatelessWidget {
                 icon: const Icon(Icons.play_arrow),
                 label: const Text('开始游戏'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2E7D32),
-                  foregroundColor: Colors.white,
+                  backgroundColor: GameColors.primaryGreen,
+                  foregroundColor: const Color(0xFF0F0F0F),
                   padding: const EdgeInsets.symmetric(
                       horizontal: 32, vertical: 14),
                   textStyle: const TextStyle(

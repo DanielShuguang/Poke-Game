@@ -11,6 +11,7 @@ import 'package:poke_game/domain/blackjack/entities/blackjack_network_action.dar
 import 'package:poke_game/domain/blackjack/entities/blackjack_player.dart';
 import 'package:poke_game/presentation/pages/blackjack/providers/blackjack_game_notifier.dart';
 import 'package:poke_game/presentation/shared/game_colors.dart';
+import 'package:poke_game/presentation/shared/widgets/game_back_button.dart';
 
 class BlackjackPage extends ConsumerStatefulWidget {
   final bool isOnline;
@@ -137,14 +138,11 @@ class _BlackjackPageState extends ConsumerState<BlackjackPage>
         gameState.phase == BlackjackPhase.playerTurn;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1B5E20),
+      backgroundColor: GameColors.bgTable,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1B5E20),
+        backgroundColor: GameColors.bgTable,
         foregroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white70),
-          onPressed: () => _confirmExit(context),
-        ),
+        leading: GameBackButton(onPressed: () => _confirmExit(context)),
         title: const Text('21 点'),
         actions: [
           if (gameState.phase == BlackjackPhase.betting)

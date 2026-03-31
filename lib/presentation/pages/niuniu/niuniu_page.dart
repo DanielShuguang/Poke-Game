@@ -12,6 +12,7 @@ import 'package:poke_game/domain/niuniu/entities/niuniu_network_action.dart';
 import 'package:poke_game/domain/niuniu/entities/niuniu_player.dart';
 import 'package:poke_game/presentation/pages/niuniu/providers/niuniu_game_notifier.dart';
 import 'package:poke_game/presentation/shared/game_colors.dart';
+import 'package:poke_game/presentation/shared/widgets/game_back_button.dart';
 
 class NiuniuPage extends ConsumerStatefulWidget {
   final bool isOnline;
@@ -171,7 +172,7 @@ class _NiuniuPageState extends ConsumerState<NiuniuPage> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1B5E20),
+      backgroundColor: GameColors.bgTable,
       body: Stack(
         children: [
           SafeArea(
@@ -214,10 +215,7 @@ class _NiuniuPageState extends ConsumerState<NiuniuPage> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Row(
         children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white70),
-            onPressed: () => _confirmExit(context),
-          ),
+          GameBackButton(onPressed: () => _confirmExit(context)),
           const Text('斗牛',
               style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
           const Spacer(),
