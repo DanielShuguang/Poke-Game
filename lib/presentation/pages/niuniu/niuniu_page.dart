@@ -11,6 +11,7 @@ import 'package:poke_game/domain/niuniu/entities/niuniu_hand.dart';
 import 'package:poke_game/domain/niuniu/entities/niuniu_network_action.dart';
 import 'package:poke_game/domain/niuniu/entities/niuniu_player.dart';
 import 'package:poke_game/presentation/pages/niuniu/providers/niuniu_game_notifier.dart';
+import 'package:poke_game/presentation/shared/game_colors.dart';
 
 class NiuniuPage extends ConsumerStatefulWidget {
   final bool isOnline;
@@ -441,24 +442,38 @@ class _CardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isRed = card.isRed;
+    final cardColor = isRed ? GameColors.cardBorderRed : GameColors.textPrimary;
+    final borderColor = isRed ? GameColors.cardBorderRed : GameColors.cardBorderBlack;
     return Container(
-      width: 22,
-      height: 32,
+      width: 36,
+      height: 52,
       margin: const EdgeInsets.symmetric(horizontal: 1),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(3),
-        boxShadow: [const BoxShadow(color: Colors.black38, blurRadius: 2)],
-      ),
-      child: Center(
-        child: Text(
-          '${card.suitSymbol}${card.displayText}',
-          style: TextStyle(
-            fontSize: 9,
-            color: card.isRed ? Colors.red : Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [GameColors.cardBg1, GameColors.cardBg2],
         ),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            card.displayText,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: cardColor,
+            ),
+          ),
+          Text(
+            card.suitSymbol,
+            style: TextStyle(fontSize: 12, color: cardColor),
+          ),
+        ],
       ),
     );
   }
@@ -468,16 +483,21 @@ class _CardBack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 22,
-      height: 32,
+      width: 36,
+      height: 52,
       margin: const EdgeInsets.symmetric(horizontal: 1),
       decoration: BoxDecoration(
-        color: Colors.indigo.shade800,
-        borderRadius: BorderRadius.circular(3),
-        border: Border.all(color: Colors.white24),
+        color: GameColors.cardBackBg,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(
+          color: GameColors.cardBorderBlack.withValues(alpha: 0.4),
+        ),
       ),
       child: const Center(
-        child: Text('🂠', style: TextStyle(fontSize: 14)),
+        child: Text(
+          '🂠',
+          style: TextStyle(fontSize: 20, color: GameColors.cardBorderBlack),
+        ),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:poke_game/domain/zhajinhua/entities/zhj_card.dart';
+import 'package:poke_game/presentation/shared/game_colors.dart';
 
 /// 炸金花手牌组件（3张牌，支持蒙牌/翻牌动画）
 class ZhjHandWidget extends StatefulWidget {
@@ -93,9 +94,13 @@ class _ZhjHandWidgetState extends State<ZhjHandWidget>
       width: w,
       height: h,
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [GameColors.cardBg1, GameColors.cardBg2],
+        ),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: card.isRed ? GameColors.cardBorderRed : GameColors.cardBorderBlack),
         boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(1, 2))],
       ),
       child: Column(
@@ -105,7 +110,7 @@ class _ZhjHandWidgetState extends State<ZhjHandWidget>
             card.suitSymbol,
             style: TextStyle(
               fontSize: 16,
-              color: card.isRed ? Colors.red : Colors.black87,
+              color: card.isRed ? GameColors.cardBorderRed : GameColors.textPrimary,
             ),
           ),
           Text(
@@ -113,7 +118,7 @@ class _ZhjHandWidgetState extends State<ZhjHandWidget>
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: card.isRed ? Colors.red : Colors.black87,
+              color: card.isRed ? GameColors.cardBorderRed : GameColors.textPrimary,
             ),
           ),
         ],
@@ -126,17 +131,18 @@ class _ZhjHandWidgetState extends State<ZhjHandWidget>
       width: w,
       height: h,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1565C0), Color(0xFF0D47A1)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: GameColors.cardBackBg,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.blue.shade800),
+        border: Border.all(
+          color: GameColors.cardBorderBlack.withValues(alpha: 0.4),
+        ),
         boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(1, 2))],
       ),
       child: const Center(
-        child: Text('🂠', style: TextStyle(fontSize: 28, color: Colors.white70)),
+        child: Text(
+          '🂠',
+          style: TextStyle(fontSize: 28, color: GameColors.cardBorderBlack),
+        ),
       ),
     );
   }

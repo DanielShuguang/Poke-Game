@@ -10,6 +10,7 @@ import 'package:poke_game/domain/blackjack/entities/blackjack_hand.dart';
 import 'package:poke_game/domain/blackjack/entities/blackjack_network_action.dart';
 import 'package:poke_game/domain/blackjack/entities/blackjack_player.dart';
 import 'package:poke_game/presentation/pages/blackjack/providers/blackjack_game_notifier.dart';
+import 'package:poke_game/presentation/shared/game_colors.dart';
 
 class BlackjackPage extends ConsumerStatefulWidget {
   final bool isOnline;
@@ -453,23 +454,34 @@ class _CardWidget extends StatelessWidget {
         width: 36,
         height: 52,
         decoration: BoxDecoration(
-          color: Colors.blue.shade800,
+          color: GameColors.cardBackBg,
           borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: Colors.white24),
+          border: Border.all(
+            color: GameColors.cardBorderBlack.withValues(alpha: 0.4),
+          ),
         ),
         child: const Center(
-          child: Text('🂠', style: TextStyle(fontSize: 20)),
+          child: Text(
+            '🂠',
+            style: TextStyle(fontSize: 20, color: GameColors.cardBorderBlack),
+          ),
         ),
       );
     }
     final isRed = card.isRed as bool;
+    final cardColor = isRed ? GameColors.cardBorderRed : GameColors.textPrimary;
+    final borderColor = isRed ? GameColors.cardBorderRed : GameColors.cardBorderBlack;
     return Container(
       width: 36,
       height: 52,
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [GameColors.cardBg1, GameColors.cardBg2],
+        ),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -479,15 +491,12 @@ class _CardWidget extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: isRed ? Colors.red : Colors.black,
+              color: cardColor,
             ),
           ),
           Text(
             card.suitSymbol as String,
-            style: TextStyle(
-              fontSize: 12,
-              color: isRed ? Colors.red : Colors.black,
-            ),
+            style: TextStyle(fontSize: 12, color: cardColor),
           ),
         ],
       ),
