@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:poke_game/domain/game/entities/game_info.dart';
 import 'package:poke_game/presentation/pages/home/home_provider.dart';
 import 'package:poke_game/presentation/pages/home/widgets/game_card_widget.dart';
+import 'package:poke_game/presentation/shared/game_colors.dart';
 
 /// 游戏首页
 class HomePage extends ConsumerWidget {
@@ -122,27 +123,20 @@ class HomePage extends ConsumerWidget {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).colorScheme.primaryContainer,
-                Theme.of(context).colorScheme.secondaryContainer,
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            gradient: GameColors.lanCardGradient,
           ),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                  color: GameColors.primaryGreen.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.wifi,
                   size: 32,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: GameColors.primaryGreen,
                 ),
               ),
               const SizedBox(width: 16),
@@ -160,7 +154,7 @@ class HomePage extends ConsumerWidget {
                     Text(
                       '与同一 WiFi 下的好友一起游戏',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                            color: GameColors.textSecondary,
                           ),
                     ),
                   ],
@@ -168,7 +162,7 @@ class HomePage extends ConsumerWidget {
               ),
               Icon(
                 Icons.arrow_forward_ios,
-                color: Theme.of(context).colorScheme.primary,
+                color: GameColors.primaryGreen,
               ),
             ],
           ),

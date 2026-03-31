@@ -112,18 +112,18 @@ class GameCardWidget extends StatelessWidget {
     switch (game.status) {
       case GameStatus.available:
         label = '已上线';
-        backgroundColor = Colors.green.shade100;
-        textColor = Colors.green.shade700;
+        backgroundColor = const Color(0xFF4ADE80).withValues(alpha: 0.15);
+        textColor = const Color(0xFF4ADE80);
         break;
       case GameStatus.comingSoon:
         label = '开发中';
-        backgroundColor = Colors.orange.shade100;
-        textColor = Colors.orange.shade700;
+        backgroundColor = const Color(0xFFFBBF24).withValues(alpha: 0.15);
+        textColor = const Color(0xFFFBBF24);
         break;
       case GameStatus.planned:
         label = '计划中';
-        backgroundColor = Colors.grey.shade200;
-        textColor = Colors.grey.shade600;
+        backgroundColor = const Color(0xFFA1A1AA).withValues(alpha: 0.15);
+        textColor = const Color(0xFFA1A1AA);
         break;
     }
 
