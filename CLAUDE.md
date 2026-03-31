@@ -2,7 +2,7 @@
 
 ## 项目概述
 
-Flutter 跨平台扑克游戏合集，已上线 5 款游戏（斗地主、德州扑克、炸金花、21点、斗牛），全部支持单机 AI 对战与局域网联机对战，支持 Android/iOS/Web/Windows/macOS/Linux。
+Flutter 跨平台扑克游戏合集，已上线 6 款游戏（斗地主、德州扑克、炸金花、21点、斗牛、升级），全部支持单机 AI 对战与局域网联机对战，支持 Android/iOS/Web/Windows/macOS/Linux。
 
 ## 技术栈
 
@@ -22,7 +22,8 @@ lib/
 │   ├── texas_holdem/              # 德州扑克
 │   ├── zhajinhua/                 # 炸金花
 │   ├── blackjack/                 # 21点
-│   └── niuniu/                    # 斗牛
+│   ├── niuniu/                    # 斗牛
+│   └── shengji/                   # 升级
 └── presentation/pages/
     ├── home/                      # 首页（游戏列表 + 局域网入口）
     ├── room/                      # 局域网（scan/create/lobby）
@@ -31,6 +32,7 @@ lib/
     ├── zhajinhua/                 # 炸金花页面
     ├── blackjack/                 # 21点页面
     ├── niuniu/                    # 斗牛页面
+    ├── shengji/                   # 升级页面
     └── settings/                  # 设置页面
 ```
 
@@ -43,7 +45,8 @@ lib/core/network/
 ├── holdem_network_adapter.dart
 ├── zhj_network_adapter.dart
 ├── blackjack_network_adapter.dart
-└── niuniu_network_adapter.dart
+├── niuniu_network_adapter.dart
+└── shengji_network_adapter.dart
 ```
 
 适配器构造参数：`incomingStream`、`broadcastFn`、`notifier`、`isHost`、`localPlayerId`
