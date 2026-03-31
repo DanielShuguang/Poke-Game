@@ -1,3 +1,5 @@
+import 'dart:math' show pi;
+
 import 'package:flutter/material.dart';
 import 'package:poke_game/domain/doudizhu/entities/card.dart' as game;
 import 'package:poke_game/presentation/shared/game_colors.dart';
@@ -99,7 +101,7 @@ class _CardWidgetState extends State<CardWidget>
     } else {
       borderColor = normalBorderColor;
       borderWidth = 1;
-      shadowColor = Colors.black.withValues(alpha: 0.3);
+      shadowColor = const Color(0x4D000000);
       blurRadius = 4;
       shadowOffset = 2;
     }
@@ -168,31 +170,13 @@ class _CardWidgetState extends State<CardWidget>
     final cardColor = widget.card.isRed
         ? GameColors.cardBorderRed
         : GameColors.textPrimary;
-    final suitText = widget.card.suitSymbol;
-    final rankText = widget.card.displayText;
 
     if (widget.card.isJoker) {
-      final jokerColor = widget.card.isBigJoker
-          ? GameColors.cardBorderGold
-          : GameColors.cardBorderBlack;
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(suitText, style: TextStyle(fontSize: isSmall ? 14 : 20)),
-            SizedBox(height: isSmall ? 2 : 4),
-            Text(
-              rankText,
-              style: TextStyle(
-                fontSize: isSmall ? 9 : 11,
-                fontWeight: FontWeight.bold,
-                color: jokerColor,
-              ),
-            ),
-          ],
-        ),
-      );
+      return _buildJokerFace(isSmall);
     }
+
+    final suitText = widget.card.suitSymbol;
+    final rankText = widget.card.displayText;
 
     return Padding(
       padding: EdgeInsets.all(isSmall ? 2 : 3),
@@ -204,57 +188,24 @@ class _CardWidgetState extends State<CardWidget>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  rankText,
-                  style: TextStyle(
-                    fontSize: smallFontSize,
-                    fontWeight: FontWeight.bold,
-                    color: cardColor,
-                    height: 1.1,
-                  ),
-                ),
-                Text(
-                  suitText,
-                  style: TextStyle(
-                    fontSize: smallFontSize,
-                    color: cardColor,
-                    height: 1.0,
-                  ),
-                ),
+                Text(rankText, style: TextStyle(fontSize: smallFontSize, fontWeight: FontWeight.bold, color: cardColor, height: 1.1)),
+                Text(suitText, style: TextStyle(fontSize: smallFontSize, color: cardColor, height: 1.0)),
               ],
             ),
           ),
           Center(
-            child: Text(
-              suitText,
-              style: TextStyle(fontSize: largeFontSize, color: cardColor),
-            ),
+            child: Text(suitText, style: TextStyle(fontSize: largeFontSize, color: cardColor)),
           ),
           Positioned(
             bottom: 0,
             right: 0,
             child: Transform.rotate(
-              angle: 3.14159,
+              angle: pi,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    rankText,
-                    style: TextStyle(
-                      fontSize: smallFontSize,
-                      fontWeight: FontWeight.bold,
-                      color: cardColor,
-                      height: 1.1,
-                    ),
-                  ),
-                  Text(
-                    suitText,
-                    style: TextStyle(
-                      fontSize: smallFontSize,
-                      color: cardColor,
-                      height: 1.0,
-                    ),
-                  ),
+                  Text(rankText, style: TextStyle(fontSize: smallFontSize, fontWeight: FontWeight.bold, color: cardColor, height: 1.1)),
+                  Text(suitText, style: TextStyle(fontSize: smallFontSize, color: cardColor, height: 1.0)),
                 ],
               ),
             ),
@@ -264,15 +215,27 @@ class _CardWidgetState extends State<CardWidget>
     );
   }
 
+  Widget _buildJokerFace(bool isSmall) {
+    final suitText = widget.card.suitSymbol;
+    final rankText = widget.card.displayText;
+    final jokerColor = widget.card.isBigJoker
+        ? GameColors.cardBorderGold
+        : GameColors.cardBorderBlack;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(suitText, style: TextStyle(fontSize: isSmall ? 14 : 20)),
+          SizedBox(height: isSmall ? 2 : 4),
+          Text(rankText, style: TextStyle(fontSize: isSmall ? 9 : 11, fontWeight: FontWeight.bold, color: jokerColor)),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCardBack() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: GameColors.cardBackBg,
-        borderRadius: BorderRadius.all(Radius.circular(4)),
-      ),
-      child: const Center(
-        child: Text('🂠', style: TextStyle(fontSize: 24, color: GameColors.cardBorderBlack)),
-      ),
+    return const Center(
+      child: Text('🂠', style: TextStyle(fontSize: 24, color: GameColors.cardBorderBlack)),
     );
   }
 }
