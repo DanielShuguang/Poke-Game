@@ -34,7 +34,7 @@ class CardHand extends StatelessWidget {
               transform: Transform.translate(
                 offset: Offset(0, isSelected ? -10 : 0),
               ).transform,
-              child: _buildCard(card, isSelected: isSelected),
+              child: _buildCard(context, card, isSelected: isSelected),
             ),
           );
         },
@@ -42,26 +42,28 @@ class CardHand extends StatelessWidget {
     );
   }
 
-  Widget _buildCard(ShengjiCard card, {bool isSelected = false}) {
+  Widget _buildCard(BuildContext context, ShengjiCard card,
+      {bool isSelected = false}) {
+    final colors = context.gameColors;
     final cardColor =
-        card.isRed ? GameColors.cardBorderRed : GameColors.textPrimary;
+        card.isRed ? colors.cardBorderRed : colors.textPrimary;
     final borderColor = card.isBigJoker
-        ? GameColors.cardBorderGold
+        ? colors.cardBorderGold
         : card.isRed
-            ? GameColors.cardBorderRed
-            : GameColors.cardBorderBlack;
+            ? colors.cardBorderRed
+            : colors.cardBorderBlack;
     final effectiveBorderColor =
-        isSelected ? GameColors.cardSelectedGlow : borderColor;
+        isSelected ? colors.cardSelectedGlow : borderColor;
 
     return Container(
       width: cardHeight * 0.7,
       height: cardHeight,
       margin: const EdgeInsets.symmetric(horizontal: 2),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [GameColors.cardBg1, GameColors.cardBg2],
+          colors: [colors.cardBg1, colors.cardBg2],
         ),
         borderRadius: BorderRadius.circular(4),
         border: Border.all(color: effectiveBorderColor, width: 1.5),

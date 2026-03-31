@@ -67,12 +67,14 @@ class _CardWidgetState extends State<CardWidget>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.gameColors;
+
     // 正常状态下按花色区分边框
     final normalBorderColor = widget.card.isBigJoker
-        ? GameColors.cardBorderGold
+        ? colors.cardBorderGold
         : widget.card.isRed
-            ? GameColors.cardBorderRed
-            : GameColors.cardBorderBlack;
+            ? colors.cardBorderRed
+            : colors.cardBorderBlack;
 
     Color borderColor;
     double borderWidth;
@@ -81,21 +83,21 @@ class _CardWidgetState extends State<CardWidget>
     double shadowOffset;
 
     if (widget.isSelected) {
-      borderColor = GameColors.cardSelectedGlow;
+      borderColor = colors.cardSelectedGlow;
       borderWidth = 2;
-      shadowColor = GameColors.cardSelectedGlow.withValues(alpha: 0.5);
+      shadowColor = colors.cardSelectedGlow.withValues(alpha: 0.5);
       blurRadius = 10;
       shadowOffset = 4;
     } else if (widget.isPreview) {
-      borderColor = GameColors.cardSelectedGlow.withValues(alpha: 0.7);
+      borderColor = colors.cardSelectedGlow.withValues(alpha: 0.7);
       borderWidth = 2;
-      shadowColor = GameColors.cardSelectedGlow.withValues(alpha: 0.3);
+      shadowColor = colors.cardSelectedGlow.withValues(alpha: 0.3);
       blurRadius = 8;
       shadowOffset = 2;
     } else if (widget.isHint) {
-      borderColor = GameColors.accentAmber;
+      borderColor = colors.accentAmber;
       borderWidth = 2;
-      shadowColor = GameColors.accentAmber.withValues(alpha: 0.3);
+      shadowColor = colors.accentAmber.withValues(alpha: 0.3);
       blurRadius = 8;
       shadowOffset = 2;
     } else {
@@ -122,13 +124,13 @@ class _CardWidgetState extends State<CardWidget>
             height: widget.height ?? 68,
             decoration: BoxDecoration(
               gradient: widget.faceUp
-                  ? const LinearGradient(
+                  ? LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [GameColors.cardBg1, GameColors.cardBg2],
+                      colors: [colors.cardBg1, colors.cardBg2],
                     )
                   : null,
-              color: widget.faceUp ? null : GameColors.cardBackBg,
+              color: widget.faceUp ? null : colors.cardBackBg,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: borderColor, width: borderWidth),
               boxShadow: [
@@ -140,7 +142,9 @@ class _CardWidgetState extends State<CardWidget>
                 ),
               ],
             ),
-            child: widget.faceUp ? _buildCardFace() : _buildCardBack(),
+            child: widget.faceUp
+                ? _buildCardFace(colors)
+                : _buildCardBack(colors),
           ),
         ),
       ),
@@ -163,16 +167,15 @@ class _CardWidgetState extends State<CardWidget>
     return cardContent;
   }
 
-  Widget _buildCardFace() {
+  Widget _buildCardFace(GameColors colors) {
     final isSmall = (widget.width ?? 48) < 40;
     final smallFontSize = isSmall ? 9.0 : 11.0;
     final largeFontSize = isSmall ? 16.0 : 22.0;
-    final cardColor = widget.card.isRed
-        ? GameColors.cardBorderRed
-        : GameColors.textPrimary;
+    final cardColor =
+        widget.card.isRed ? colors.cardBorderRed : colors.textPrimary;
 
     if (widget.card.isJoker) {
-      return _buildJokerFace(isSmall);
+      return _buildJokerFace(isSmall, colors);
     }
 
     final suitText = widget.card.suitSymbol;
@@ -188,13 +191,21 @@ class _CardWidgetState extends State<CardWidget>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(rankText, style: TextStyle(fontSize: smallFontSize, fontWeight: FontWeight.bold, color: cardColor, height: 1.1)),
-                Text(suitText, style: TextStyle(fontSize: smallFontSize, color: cardColor, height: 1.0)),
+                Text(rankText,
+                    style: TextStyle(
+                        fontSize: smallFontSize,
+                        fontWeight: FontWeight.bold,
+                        color: cardColor,
+                        height: 1.1)),
+                Text(suitText,
+                    style: TextStyle(
+                        fontSize: smallFontSize, color: cardColor, height: 1.0)),
               ],
             ),
           ),
           Center(
-            child: Text(suitText, style: TextStyle(fontSize: largeFontSize, color: cardColor)),
+            child: Text(suitText,
+                style: TextStyle(fontSize: largeFontSize, color: cardColor)),
           ),
           Positioned(
             bottom: 0,
@@ -204,8 +215,17 @@ class _CardWidgetState extends State<CardWidget>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(rankText, style: TextStyle(fontSize: smallFontSize, fontWeight: FontWeight.bold, color: cardColor, height: 1.1)),
-                  Text(suitText, style: TextStyle(fontSize: smallFontSize, color: cardColor, height: 1.0)),
+                  Text(rankText,
+                      style: TextStyle(
+                          fontSize: smallFontSize,
+                          fontWeight: FontWeight.bold,
+                          color: cardColor,
+                          height: 1.1)),
+                  Text(suitText,
+                      style: TextStyle(
+                          fontSize: smallFontSize,
+                          color: cardColor,
+                          height: 1.0)),
                 ],
               ),
             ),
@@ -215,27 +235,32 @@ class _CardWidgetState extends State<CardWidget>
     );
   }
 
-  Widget _buildJokerFace(bool isSmall) {
+  Widget _buildJokerFace(bool isSmall, GameColors colors) {
     final suitText = widget.card.suitSymbol;
     final rankText = widget.card.displayText;
     final jokerColor = widget.card.isBigJoker
-        ? GameColors.cardBorderGold
-        : GameColors.cardBorderBlack;
+        ? colors.cardBorderGold
+        : colors.cardBorderBlack;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(suitText, style: TextStyle(fontSize: isSmall ? 14 : 20)),
           SizedBox(height: isSmall ? 2 : 4),
-          Text(rankText, style: TextStyle(fontSize: isSmall ? 9 : 11, fontWeight: FontWeight.bold, color: jokerColor)),
+          Text(rankText,
+              style: TextStyle(
+                  fontSize: isSmall ? 9 : 11,
+                  fontWeight: FontWeight.bold,
+                  color: jokerColor)),
         ],
       ),
     );
   }
 
-  Widget _buildCardBack() {
-    return const Center(
-      child: Text('🂠', style: TextStyle(fontSize: 24, color: GameColors.cardBorderBlack)),
+  Widget _buildCardBack(GameColors colors) {
+    return Center(
+      child: Text('🂠',
+          style: TextStyle(fontSize: 24, color: colors.cardBorderBlack)),
     );
   }
 }

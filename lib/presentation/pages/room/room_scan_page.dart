@@ -5,6 +5,7 @@ import 'package:logger/logger.dart';
 import 'package:poke_game/domain/lan/entities/room.dart';
 import 'package:poke_game/domain/lan/entities/room_info.dart';
 import 'package:poke_game/presentation/pages/room/room_lobby_page.dart';
+import 'package:poke_game/presentation/shared/game_colors.dart';
 import 'package:poke_game/presentation/pages/room/room_scan_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:dio/dio.dart';
@@ -79,12 +80,13 @@ class RoomScanPage extends ConsumerWidget {
     RoomScanState state,
   ) {
     final networkCheck = state.networkCheck;
+    final colors = context.gameColors;
 
     if (networkCheck == null) {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.all(12),
-        color: Colors.blue.shade100,
+        color: colors.statusInfoBg,
         child: Row(
           children: [
             const SizedBox(
@@ -95,7 +97,7 @@ class RoomScanPage extends ConsumerWidget {
             const SizedBox(width: 12),
             Text(
               '正在检测网络环境...',
-              style: TextStyle(color: Colors.blue.shade900),
+              style: TextStyle(color: colors.statusInfoColor),
             ),
           ],
         ),
@@ -106,15 +108,15 @@ class RoomScanPage extends ConsumerWidget {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.all(12),
-        color: Colors.red.shade100,
+        color: colors.statusErrorBg,
         child: Row(
           children: [
-            Icon(Icons.warning_amber, color: Colors.red.shade900),
+            Icon(Icons.warning_amber, color: colors.dangerRed),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 networkCheck.message ?? '网络不可用',
-                style: TextStyle(color: Colors.red.shade900),
+                style: TextStyle(color: colors.dangerRed),
               ),
             ),
             TextButton(
@@ -129,14 +131,14 @@ class RoomScanPage extends ConsumerWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
-      color: Colors.green.shade100,
+      color: colors.statusSuccessBg,
       child: Row(
         children: [
-          Icon(Icons.wifi, color: Colors.green.shade900),
+          Icon(Icons.wifi, color: colors.primaryGreen),
           const SizedBox(width: 12),
           Text(
             '已连接 WiFi (${networkCheck.localIp})',
-            style: TextStyle(color: Colors.green.shade900),
+            style: TextStyle(color: colors.primaryGreen),
           ),
         ],
       ),
@@ -184,7 +186,7 @@ class RoomScanPage extends ConsumerWidget {
           Text(
             '请确保设备在同一 WiFi 网络下',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey,
+                  color: context.gameColors.textSecondary,
                 ),
           ),
         ],
@@ -201,13 +203,13 @@ class RoomScanPage extends ConsumerWidget {
           Icon(
             Icons.wifi_find_outlined,
             size: 64,
-            color: Colors.grey.shade400,
+            color: context.gameColors.textSecondary,
           ),
           const SizedBox(height: 16),
           Text(
             '点击下方按钮扫描房间',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.grey.shade600,
+                  color: context.gameColors.textSecondary,
                 ),
           ),
           const SizedBox(height: 8),
@@ -236,7 +238,7 @@ class RoomScanPage extends ConsumerWidget {
             Icon(
               Icons.error_outline,
               size: 64,
-              color: Colors.red.shade300,
+              color: context.gameColors.dangerRed,
             ),
             const SizedBox(height: 16),
             Text(
@@ -386,6 +388,7 @@ class _RoomCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.gameColors;
     return Card(
       child: InkWell(
         onTap: room.canJoin ? () => _joinRoom(context, ref) : null,
@@ -414,23 +417,23 @@ class _RoomCard extends ConsumerWidget {
                   Icon(
                     Icons.games_outlined,
                     size: 16,
-                    color: Colors.grey.shade600,
+                    color: colors.textSecondary,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     room.gameType.displayName,
-                    style: TextStyle(color: Colors.grey.shade600),
+                    style: TextStyle(color: colors.textSecondary),
                   ),
                   const SizedBox(width: 16),
                   Icon(
                     Icons.people_outline,
                     size: 16,
-                    color: Colors.grey.shade600,
+                    color: colors.textSecondary,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     '${room.currentPlayerCount}/${room.maxPlayerCount}',
-                    style: TextStyle(color: Colors.grey.shade600),
+                    style: TextStyle(color: colors.textSecondary),
                   ),
                 ],
               ),
@@ -447,17 +450,18 @@ class _RoomCard extends ConsumerWidget {
   }
 
   Widget _buildStatusChip(BuildContext context) {
+    final colors = context.gameColors;
     if (room.isFull) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.grey.shade200,
+          color: colors.bgSurface,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
           '已满',
           style: TextStyle(
-            color: Colors.grey.shade700,
+            color: colors.textSecondary,
             fontSize: 12,
           ),
         ),
@@ -468,13 +472,13 @@ class _RoomCard extends ConsumerWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.orange.shade100,
+          color: colors.accentAmberBg,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
           '游戏中',
           style: TextStyle(
-            color: Colors.orange.shade700,
+            color: colors.accentAmber,
             fontSize: 12,
           ),
         ),
@@ -484,13 +488,13 @@ class _RoomCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.green.shade100,
+        color: colors.statusSuccessBg,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         '可加入',
         style: TextStyle(
-          color: Colors.green.shade700,
+          color: colors.primaryGreen,
           fontSize: 12,
         ),
       ),

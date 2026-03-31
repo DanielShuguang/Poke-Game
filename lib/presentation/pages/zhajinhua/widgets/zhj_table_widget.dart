@@ -18,6 +18,7 @@ class ZhjTableWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.gameColors;
     final players = gameState.players;
     final humanIndex = players.indexWhere((p) => p.id == 'human');
     final aiPlayers = players.where((p) => p.isAi).toList();
@@ -28,9 +29,9 @@ class ZhjTableWidget extends StatelessWidget {
       children: [
         // 桌面背景
         Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: RadialGradient(
-              colors: [GameColors.bgTable, GameColors.bgBase],
+              colors: [colors.bgTable, colors.bgBase],
               radius: 1.2,
             ),
           ),

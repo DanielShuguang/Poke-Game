@@ -26,6 +26,7 @@ import 'package:poke_game/presentation/pages/niuniu/niuniu_page.dart';
 import 'package:poke_game/presentation/pages/niuniu/providers/niuniu_game_notifier.dart';
 import 'package:poke_game/presentation/pages/shengji/shengji_page.dart';
 import 'package:poke_game/domain/shengji/notifiers/shengji_notifier.dart';
+import 'package:poke_game/presentation/shared/game_colors.dart';
 
 /// 等待大厅状态
 class LobbyState {
@@ -451,12 +452,12 @@ class _RoomLobbyPageState extends ConsumerState<RoomLobbyPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.green.shade100,
+                color: context.gameColors.statusSuccessBg,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 '等待中',
-                style: TextStyle(color: Colors.green.shade700, fontSize: 12),
+                style: TextStyle(color: context.gameColors.primaryGreen, fontSize: 12),
               ),
             ),
         ],
@@ -791,12 +792,12 @@ class _PlayerSeatCard extends StatelessWidget {
       return Card(
         child: ListTile(
           leading: CircleAvatar(
-            backgroundColor: Colors.grey.shade200,
+            backgroundColor: context.gameColors.bgSurface,
             child: Text('$seatNumber'),
           ),
           title: Text(
             '等待加入...',
-            style: TextStyle(color: Colors.grey.shade500),
+            style: TextStyle(color: context.gameColors.textSecondary),
           ),
         ),
       );
@@ -807,7 +808,7 @@ class _PlayerSeatCard extends StatelessWidget {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: player!.isHost
-              ? Colors.amber
+              ? context.gameColors.accentAmber
               : Theme.of(context).colorScheme.primary,
           child: player!.isHost
               ? const Icon(Icons.star, color: Colors.white)
@@ -821,12 +822,12 @@ class _PlayerSeatCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.amber.shade100,
+                  color: context.gameColors.accentAmberBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   '房主',
-                  style: TextStyle(fontSize: 10, color: Colors.amber.shade900),
+                  style: TextStyle(fontSize: 10, color: context.gameColors.accentAmber),
                 ),
               ),
             ],
@@ -837,7 +838,7 @@ class _PlayerSeatCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (player!.status == PlayerStatus.ready)
-              Icon(Icons.check_circle, color: Colors.green.shade600),
+              Icon(Icons.check_circle, color: context.gameColors.primaryGreen),
             if (isHost && onKick != null && !isCurrentPlayer)
               IconButton(
                 icon: const Icon(Icons.person_remove_outlined),

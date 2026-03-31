@@ -190,7 +190,7 @@ class _ShengjiPageState extends ConsumerState<ShengjiPage> {
     final localPlayer = gameState.players.where((p) => p.id == localId).firstOrNull;
 
     return Scaffold(
-      backgroundColor: GameColors.bgTable,
+      backgroundColor: context.gameColors.bgTable,
       body: Stack(
         children: [
           // 主游戏区域
@@ -249,12 +249,12 @@ class _ShengjiPageState extends ConsumerState<ShengjiPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.black38,
+                color: context.gameColors.overlay,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 '将牌: ${gameState.trumpInfo}',
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: TextStyle(color: context.gameColors.textPrimary, fontSize: 16),
               ),
             ),
           const Spacer(),
@@ -263,13 +263,13 @@ class _ShengjiPageState extends ConsumerState<ShengjiPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
-                color: _countdown <= 10 ? Colors.red.shade700 : Colors.orange.shade700,
+                color: _countdown <= 10 ? context.gameColors.dangerRed : context.gameColors.accentAmber,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 '$_countdown 秒',
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: context.gameColors.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -321,7 +321,7 @@ class _ShengjiPageState extends ConsumerState<ShengjiPage> {
             children: [
               Text(
                 '座位 ${entry.key}',
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                style: TextStyle(color: context.gameColors.textSecondary, fontSize: 12),
               ),
               const SizedBox(height: 4),
               Row(
@@ -362,7 +362,7 @@ class _ShengjiPageState extends ConsumerState<ShengjiPage> {
                   const SizedBox(width: 12),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: GameColors.primaryGreen,
+                      backgroundColor: context.gameColors.primaryGreen,
                       foregroundColor: const Color(0xFF0F0F0F),
                       minimumSize: const Size(60, 30),
                       padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -374,8 +374,8 @@ class _ShengjiPageState extends ConsumerState<ShengjiPage> {
                   const SizedBox(width: 8),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: GameColors.bgSurface,
-                      foregroundColor: GameColors.primaryGreen,
+                      backgroundColor: context.gameColors.bgSurface,
+                      foregroundColor: context.gameColors.primaryGreen,
                       minimumSize: const Size(60, 30),
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -404,14 +404,16 @@ class _ShengjiPageState extends ConsumerState<ShengjiPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: isTeammate ? Colors.blue.shade700 : Colors.black38,
+        color: isTeammate ? context.gameColors.teamColor : context.gameColors.overlay,
         borderRadius: BorderRadius.circular(8),
-        border: isCurrentPlayer ? Border.all(color: Colors.yellow, width: 2) : null,
+        border: isCurrentPlayer
+            ? Border.all(color: context.gameColors.accentAmber, width: 2)
+            : null,
       ),
       child: Text(
         '${player.name}  ${player.hand.length}张',
         style: TextStyle(
-          color: Colors.white,
+          color: context.gameColors.textPrimary,
           fontSize: 13,
           fontWeight: isCurrentPlayer ? FontWeight.bold : FontWeight.normal,
         ),
@@ -463,20 +465,27 @@ class _ShengjiPageState extends ConsumerState<ShengjiPage> {
 
   /// 牌面组件
   Widget _buildCardWidget(ShengjiCard card, double height) {
+    final colors = context.gameColors;
     return Container(
       width: height * 0.7,
       height: height,
       margin: const EdgeInsets.symmetric(horizontal: 2),
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [colors.cardBg1, colors.cardBg2],
+        ),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.black26),
+        border: Border.all(
+          color: card.isRed ? colors.cardBorderRed : colors.cardBorderBlack,
+        ),
       ),
       child: Center(
         child: Text(
           card.toString(),
           style: TextStyle(
-            color: card.isRed ? Colors.red : Colors.black,
+            color: card.isRed ? colors.cardBorderRed : colors.textPrimary,
             fontSize: height * 0.35,
             fontWeight: FontWeight.bold,
           ),

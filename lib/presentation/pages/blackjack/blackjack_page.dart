@@ -138,9 +138,9 @@ class _BlackjackPageState extends ConsumerState<BlackjackPage>
         gameState.phase == BlackjackPhase.playerTurn;
 
     return Scaffold(
-      backgroundColor: GameColors.bgTable,
+      backgroundColor: context.gameColors.bgTable,
       appBar: AppBar(
-        backgroundColor: GameColors.bgTable,
+        backgroundColor: context.gameColors.bgTable,
         foregroundColor: Colors.white,
         leading: GameBackButton(onPressed: () => _confirmExit(context)),
         title: const Text('21 点'),
@@ -356,6 +356,7 @@ class _HandWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.gameColors;
     final statusText = _statusLabel(hand.status);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,7 +390,7 @@ class _HandWidget extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: _statusColor(hand.status),
+                  color: _statusColor(hand.status, colors),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -421,16 +422,16 @@ class _HandWidget extends StatelessWidget {
     }
   }
 
-  Color _statusColor(BlackjackHandStatus status) {
+  Color _statusColor(BlackjackHandStatus status, GameColors colors) {
     switch (status) {
       case BlackjackHandStatus.bust:
       case BlackjackHandStatus.surrendered:
-        return Colors.red.shade700;
+        return colors.dangerRed;
       case BlackjackHandStatus.blackjack:
       case BlackjackHandStatus.fiveCardCharlie:
-        return Colors.amber.shade700;
+        return colors.accentAmber;
       default:
-        return Colors.blueGrey;
+        return colors.textSecondary;
     }
   }
 }
@@ -447,36 +448,37 @@ class _CardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.gameColors;
     if (faceDown) {
       return Container(
         width: 36,
         height: 52,
         decoration: BoxDecoration(
-          color: GameColors.cardBackBg,
+          color: colors.cardBackBg,
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
-            color: GameColors.cardBorderBlack.withValues(alpha: 0.4),
+            color: colors.cardBorderBlack.withValues(alpha: 0.4),
           ),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
             '🂠',
-            style: TextStyle(fontSize: 20, color: GameColors.cardBorderBlack),
+            style: TextStyle(fontSize: 20, color: colors.cardBorderBlack),
           ),
         ),
       );
     }
     final isRed = card.isRed as bool;
-    final cardColor = isRed ? GameColors.cardBorderRed : GameColors.textPrimary;
-    final borderColor = isRed ? GameColors.cardBorderRed : GameColors.cardBorderBlack;
+    final cardColor = isRed ? colors.cardBorderRed : colors.textPrimary;
+    final borderColor = isRed ? colors.cardBorderRed : colors.cardBorderBlack;
     return Container(
       width: 36,
       height: 52,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [GameColors.cardBg1, GameColors.cardBg2],
+          colors: [colors.cardBg1, colors.cardBg2],
         ),
         borderRadius: BorderRadius.circular(4),
         border: Border.all(color: borderColor),
@@ -621,14 +623,15 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.gameColors;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: onPressed != null
-              ? Colors.green.shade700
-              : Colors.grey.shade700,
+              ? colors.primaryGreen
+              : colors.textSecondary,
           foregroundColor: Colors.white,
           minimumSize: const Size(64, 48),
           padding: const EdgeInsets.symmetric(horizontal: 8),

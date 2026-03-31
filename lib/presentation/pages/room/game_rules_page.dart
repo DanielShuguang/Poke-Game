@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:poke_game/domain/game/entities/game_type_config.dart';
 import 'package:poke_game/domain/lan/entities/room_info.dart';
+import 'package:poke_game/presentation/shared/game_colors.dart';
 
 /// 游戏规则页面
 class GameRulesPage extends StatelessWidget {
@@ -69,12 +70,12 @@ class GameRulesPage extends StatelessWidget {
                 Icon(
                   Icons.timer_outlined,
                   size: 16,
-                  color: Colors.grey.shade600,
+                  color: context.gameColors.textSecondary,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   '预计 ${config.estimatedDuration} 分钟',
-                  style: TextStyle(color: Colors.grey.shade600),
+                  style: TextStyle(color: context.gameColors.textSecondary),
                 ),
               ],
             ),
@@ -170,7 +171,7 @@ class GameRulesPage extends StatelessWidget {
                 Text(
                   option.description!,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey,
+                        color: context.gameColors.textSecondary,
                       ),
                 ),
             ],

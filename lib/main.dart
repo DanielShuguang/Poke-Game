@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:poke_game/core/router/app_router.dart';
 import 'package:poke_game/presentation/pages/settings/settings_provider.dart';
+import 'package:poke_game/presentation/shared/game_colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,6 +54,7 @@ class MyApp extends ConsumerWidget {
           centerTitle: true,
           elevation: 0,
         ),
+        extensions: const [GameColors.light],
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -62,6 +64,7 @@ class MyApp extends ConsumerWidget {
         scaffoldBackgroundColor: const Color(0xFF0F0F0F),
         useMaterial3: true,
         textTheme: GoogleFonts.notoSansScTextTheme(ThemeData.dark().textTheme),
+        extensions: const [GameColors.dark],
       ),
       themeMode: themeMode,
       routerConfig: appRouter,

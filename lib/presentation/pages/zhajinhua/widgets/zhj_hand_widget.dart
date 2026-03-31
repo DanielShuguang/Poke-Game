@@ -85,23 +85,27 @@ class _ZhjHandWidgetState extends State<ZhjHandWidget>
   Widget _buildCard(BuildContext context, ZhjCard? card, bool faceUp) {
     const w = 48.0;
     const h = 68.0;
+    final colors = context.gameColors;
 
     if (!faceUp || card == null) {
-      return _cardBack(w, h);
+      return _cardBack(context, w, h);
     }
 
     return Container(
       width: w,
       height: h,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [GameColors.cardBg1, GameColors.cardBg2],
+          colors: [colors.cardBg1, colors.cardBg2],
         ),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: card.isRed ? GameColors.cardBorderRed : GameColors.cardBorderBlack),
-        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(1, 2))],
+        border: Border.all(
+            color: card.isRed ? colors.cardBorderRed : colors.cardBorderBlack),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(1, 2))
+        ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -110,7 +114,7 @@ class _ZhjHandWidgetState extends State<ZhjHandWidget>
             card.suitSymbol,
             style: TextStyle(
               fontSize: 16,
-              color: card.isRed ? GameColors.cardBorderRed : GameColors.textPrimary,
+              color: card.isRed ? colors.cardBorderRed : colors.textPrimary,
             ),
           ),
           Text(
@@ -118,7 +122,7 @@ class _ZhjHandWidgetState extends State<ZhjHandWidget>
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: card.isRed ? GameColors.cardBorderRed : GameColors.textPrimary,
+              color: card.isRed ? colors.cardBorderRed : colors.textPrimary,
             ),
           ),
         ],
@@ -126,22 +130,25 @@ class _ZhjHandWidgetState extends State<ZhjHandWidget>
     );
   }
 
-  Widget _cardBack(double w, double h) {
+  Widget _cardBack(BuildContext context, double w, double h) {
+    final colors = context.gameColors;
     return Container(
       width: w,
       height: h,
       decoration: BoxDecoration(
-        color: GameColors.cardBackBg,
+        color: colors.cardBackBg,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: GameColors.cardBorderBlack.withValues(alpha: 0.4),
+          color: colors.cardBorderBlack.withValues(alpha: 0.4),
         ),
-        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(1, 2))],
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(1, 2))
+        ],
       ),
-      child: const Center(
+      child: Center(
         child: Text(
           '🂠',
-          style: TextStyle(fontSize: 28, color: GameColors.cardBorderBlack),
+          style: TextStyle(fontSize: 28, color: colors.cardBorderBlack),
         ),
       ),
     );

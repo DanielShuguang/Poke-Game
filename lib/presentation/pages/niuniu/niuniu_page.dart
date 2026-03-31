@@ -172,7 +172,7 @@ class _NiuniuPageState extends ConsumerState<NiuniuPage> {
     }
 
     return Scaffold(
-      backgroundColor: GameColors.bgTable,
+      backgroundColor: context.gameColors.bgTable,
       body: Stack(
         children: [
           SafeArea(
@@ -338,6 +338,7 @@ class _PlayerZone extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.gameColors;
     final hand = player.hand;
     return Container(
       width: isBanker ? double.infinity : 140,
@@ -388,7 +389,7 @@ class _PlayerZone extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: _rankColor(hand.rank),
+                color: _rankColor(hand.rank, colors),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -415,19 +416,19 @@ class _PlayerZone extends StatelessWidget {
     );
   }
 
-  Color _rankColor(NiuniuRank rank) {
+  Color _rankColor(NiuniuRank rank, GameColors colors) {
     switch (rank) {
       case NiuniuRank.bomb:
       case NiuniuRank.fiveSmall:
-        return Colors.red.shade700;
+        return colors.dangerRed;
       case NiuniuRank.niuNiu:
-        return Colors.orange.shade700;
+        return colors.accentAmber;
       case NiuniuRank.niu7:
       case NiuniuRank.niu8:
       case NiuniuRank.niu9:
-        return Colors.blue.shade700;
+        return colors.teamColor;
       default:
-        return Colors.grey.shade700;
+        return colors.textSecondary;
     }
   }
 }
@@ -440,18 +441,19 @@ class _CardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.gameColors;
     final isRed = card.isRed;
-    final cardColor = isRed ? GameColors.cardBorderRed : GameColors.textPrimary;
-    final borderColor = isRed ? GameColors.cardBorderRed : GameColors.cardBorderBlack;
+    final cardColor = isRed ? colors.cardBorderRed : colors.textPrimary;
+    final borderColor = isRed ? colors.cardBorderRed : colors.cardBorderBlack;
     return Container(
       width: 36,
       height: 52,
       margin: const EdgeInsets.symmetric(horizontal: 1),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [GameColors.cardBg1, GameColors.cardBg2],
+          colors: [colors.cardBg1, colors.cardBg2],
         ),
         borderRadius: BorderRadius.circular(4),
         border: Border.all(color: borderColor),
@@ -480,21 +482,22 @@ class _CardWidget extends StatelessWidget {
 class _CardBack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colors = context.gameColors;
     return Container(
       width: 36,
       height: 52,
       margin: const EdgeInsets.symmetric(horizontal: 1),
       decoration: BoxDecoration(
-        color: GameColors.cardBackBg,
+        color: colors.cardBackBg,
         borderRadius: BorderRadius.circular(4),
         border: Border.all(
-          color: GameColors.cardBorderBlack.withValues(alpha: 0.4),
+          color: colors.cardBorderBlack.withValues(alpha: 0.4),
         ),
       ),
-      child: const Center(
+      child: Center(
         child: Text(
           '🂠',
-          style: TextStyle(fontSize: 20, color: GameColors.cardBorderBlack),
+          style: TextStyle(fontSize: 20, color: colors.cardBorderBlack),
         ),
       ),
     );

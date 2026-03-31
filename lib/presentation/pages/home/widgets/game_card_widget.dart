@@ -19,9 +19,10 @@ class GameCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.gameColors;
     return Card(
       clipBehavior: Clip.antiAlias,
-      color: GameColors.bgSurface,
+      color: colors.bgSurface,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -33,7 +34,7 @@ class GameCardWidget extends StatelessWidget {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: GameColors.primaryGreen.withValues(alpha: 0.1),
+                  color: colors.primaryGreen.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
@@ -54,22 +55,22 @@ class GameCardWidget extends StatelessWidget {
                         Expanded(
                           child: Text(
                             game.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: GameColors.textPrimary,
+                              color: colors.textPrimary,
                             ),
                           ),
                         ),
-                        _buildStatusBadge(context),
+                        _buildStatusBadge(context, colors),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text(
                       game.description,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: GameColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -83,7 +84,7 @@ class GameCardWidget extends StatelessWidget {
                           icon: const Icon(Icons.wifi, size: 14),
                           label: const Text('联机对战'),
                           style: TextButton.styleFrom(
-                            foregroundColor: GameColors.primaryGreen,
+                            foregroundColor: colors.primaryGreen,
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 2),
                             minimumSize: Size.zero,
@@ -98,10 +99,10 @@ class GameCardWidget extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               // 箭头图标
-              const Icon(
+              Icon(
                 Icons.arrow_forward_ios,
                 size: 16,
-                color: GameColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ],
           ),
@@ -110,7 +111,7 @@ class GameCardWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(BuildContext context) {
+  Widget _buildStatusBadge(BuildContext context, GameColors colors) {
     String label;
     Color backgroundColor;
     Color textColor;
@@ -118,18 +119,18 @@ class GameCardWidget extends StatelessWidget {
     switch (game.status) {
       case GameStatus.available:
         label = '已上线';
-        backgroundColor = const Color(0xFF4ADE80).withValues(alpha: 0.15);
-        textColor = const Color(0xFF4ADE80);
+        backgroundColor = colors.primaryGreen.withValues(alpha: 0.15);
+        textColor = colors.primaryGreen;
         break;
       case GameStatus.comingSoon:
         label = '开发中';
-        backgroundColor = const Color(0xFFFBBF24).withValues(alpha: 0.15);
-        textColor = const Color(0xFFFBBF24);
+        backgroundColor = colors.accentAmber.withValues(alpha: 0.15);
+        textColor = colors.accentAmber;
         break;
       case GameStatus.planned:
         label = '计划中';
-        backgroundColor = const Color(0xFFA1A1AA).withValues(alpha: 0.15);
-        textColor = const Color(0xFFA1A1AA);
+        backgroundColor = colors.textSecondary.withValues(alpha: 0.15);
+        textColor = colors.textSecondary;
         break;
     }
 

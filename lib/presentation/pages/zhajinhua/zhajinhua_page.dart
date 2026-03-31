@@ -128,7 +128,7 @@ class _ZhajinhuaPageState extends ConsumerState<ZhajinhuaPage> {
     }
 
     return Scaffold(
-      backgroundColor: GameColors.bgBase,
+      backgroundColor: context.gameColors.bgBase,
       body: SafeArea(
         child: Stack(
           children: [

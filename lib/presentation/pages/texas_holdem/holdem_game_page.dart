@@ -80,7 +80,7 @@ class _HoldemGamePageState extends ConsumerState<HoldemGamePage> {
   Widget build(BuildContext context) {
     final state = ref.watch(holdemGameProvider);
     return Scaffold(
-      backgroundColor: GameColors.bgTable, // 扑克绿色桌面
+      backgroundColor: context.gameColors.bgTable, // 扑克绿色桌面
       body: SafeArea(
         child: Stack(
           children: [
@@ -333,7 +333,7 @@ class _WaitingOverlay extends StatelessWidget {
                 icon: const Icon(Icons.play_arrow),
                 label: const Text('开始游戏'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: GameColors.primaryGreen,
+                  backgroundColor: context.gameColors.primaryGreen,
                   foregroundColor: const Color(0xFF0F0F0F),
                   padding: const EdgeInsets.symmetric(
                       horizontal: 32, vertical: 14),

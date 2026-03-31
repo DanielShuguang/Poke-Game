@@ -89,7 +89,7 @@ class _DoudizhuGamePageState extends ConsumerState<DoudizhuGamePage> {
         }
       },
       child: Scaffold(
-        backgroundColor: GameColors.bgTable,
+        backgroundColor: context.gameColors.bgTable,
         body: Stack(
           children: [
             // 主内容
@@ -429,7 +429,8 @@ class _TurnCountdownState extends State<_TurnCountdown>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _ctrl,
-      builder: (_, __) {
+      builder: (ctx, __) {
+        final colors = ctx.gameColors;
         final remaining = 1 - _ctrl.value;
         final remainingSecs = (remaining * widget.seconds).ceil();
         final isUrgent = remainingSecs <= 3;
@@ -443,8 +444,8 @@ class _TurnCountdownState extends State<_TurnCountdown>
               if (isUrgent)
                 _BlinkText(
                   text: '请尽快出牌！剩余 $remainingSecs 秒',
-                  style: const TextStyle(
-                    color: Colors.red,
+                  style: TextStyle(
+                    color: colors.dangerRed,
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                   ),
@@ -453,7 +454,7 @@ class _TurnCountdownState extends State<_TurnCountdown>
                 Text(
                   '剩余 $remainingSecs 秒',
                   style: TextStyle(
-                    color: Colors.grey.shade600,
+                    color: colors.textSecondary,
                     fontSize: 12,
                   ),
                 ),
@@ -463,9 +464,9 @@ class _TurnCountdownState extends State<_TurnCountdown>
                 child: LinearProgressIndicator(
                   value: remaining,
                   minHeight: 6,
-                  backgroundColor: Colors.grey.shade300,
+                  backgroundColor: colors.progressTrackBg,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    isUrgent ? Colors.red : Colors.teal,
+                    isUrgent ? colors.dangerRed : colors.primaryGreen,
                   ),
                 ),
               ),

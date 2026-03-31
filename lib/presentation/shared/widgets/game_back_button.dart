@@ -10,10 +10,11 @@ class GameBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.gameColors;
     return IconButton(
       style: IconButton.styleFrom(
-        backgroundColor: GameColors.bgSurface,
-        foregroundColor: GameColors.textSecondary,
+        backgroundColor: colors.bgSurface,
+        foregroundColor: colors.textSecondary,
       ),
       icon: const Icon(Icons.arrow_back),
       onPressed: onPressed,
