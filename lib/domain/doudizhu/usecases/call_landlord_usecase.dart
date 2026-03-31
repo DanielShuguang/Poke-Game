@@ -54,36 +54,33 @@ class CallLandlordUseCase {
     // 不叫，检查是否全部不叫
     final newCallCount = state.callCount + 1;
 
-    // 人机模式下，如果人类玩家（index 0）不叫，且只剩下最后一个AI没叫
-    // 则最后一个AI必须叫地主
-    if (isHumanVsAi && playerIndex == 0 && newCallCount == state.players.length - 1) {
-      // 最后一个AI强制叫地主
-      final lastAiIndex = state.players.length - 1;
-      final lastAi = state.players[lastAiIndex];
-      lastAi.role = PlayerRole.landlord;
-      lastAi.handCards = [...lastAi.handCards, ...state.landlordCards];
-      lastAi.handCards.sort();
+    if (newCallCount >= state.players.length) {
+      if (isHumanVsAi) {
+        // 人机模式：不允许全部不叫，强制最后一名AI（index 末位）叫地主
+        final forcedAiIndex = state.players.length - 1;
+        final forcedAi = state.players[forcedAiIndex];
+        forcedAi.role = PlayerRole.landlord;
+        forcedAi.handCards = [...forcedAi.handCards, ...state.landlordCards];
+        forcedAi.handCards.sort();
 
-      // 设置其他玩家为农民
-      for (var i = 0; i < state.players.length; i++) {
-        if (i != lastAiIndex) {
-          state.players[i].role = PlayerRole.peasant;
+        for (var i = 0; i < state.players.length; i++) {
+          if (i != forcedAiIndex) {
+            state.players[i].role = PlayerRole.peasant;
+          }
         }
+
+        return CallLandlordResult(
+          gameState: state.copyWith(
+            phase: GamePhase.playing,
+            landlordIndex: forcedAiIndex,
+            currentPlayerIndex: forcedAiIndex,
+            lastPlayedCards: null,
+            lastPlayerIndex: null,
+          ),
+        );
       }
 
-      return CallLandlordResult(
-        gameState: state.copyWith(
-          phase: GamePhase.playing,
-          landlordIndex: lastAiIndex,
-          currentPlayerIndex: lastAiIndex,
-          lastPlayedCards: null,
-          lastPlayerIndex: null,
-        ),
-      );
-    }
-
-    if (newCallCount >= state.players.length) {
-      // 非人机模式下，全部不叫，重新开始
+      // 非人机模式：全部不叫，重新开始
       return CallLandlordResult(
         gameState: GameState.initial(),
         allPassed: true,

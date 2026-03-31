@@ -101,7 +101,11 @@ class _DoudizhuGamePageState extends ConsumerState<DoudizhuGamePage> {
               left: 8,
               child: SafeArea(
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white70),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.black45,
+                    foregroundColor: Colors.white,
+                  ),
+                  icon: const Icon(Icons.arrow_back),
                   onPressed: () => _confirmExit(context),
                 ),
               ),
