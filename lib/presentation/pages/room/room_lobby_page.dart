@@ -11,6 +11,7 @@ import 'package:poke_game/core/network/udp_broadcaster.dart';
 import 'package:poke_game/core/network/websocket_client.dart';
 import 'package:poke_game/core/network/websocket_manager.dart';
 import 'package:poke_game/core/network/zhj_network_adapter.dart';
+import 'package:poke_game/core/network/shengji_network_adapter.dart';
 import 'package:poke_game/domain/lan/entities/player_identity.dart';
 import 'package:poke_game/domain/lan/entities/room.dart';
 import 'package:poke_game/domain/lan/entities/room_info.dart';
@@ -23,6 +24,8 @@ import 'package:poke_game/presentation/pages/blackjack/providers/blackjack_game_
 import 'package:poke_game/core/network/niuniu_network_adapter.dart';
 import 'package:poke_game/presentation/pages/niuniu/niuniu_page.dart';
 import 'package:poke_game/presentation/pages/niuniu/providers/niuniu_game_notifier.dart';
+import 'package:poke_game/presentation/pages/shengji/shengji_page.dart';
+import 'package:poke_game/domain/shengji/notifiers/shengji_notifier.dart';
 
 /// 等待大厅状态
 class LobbyState {
@@ -749,6 +752,19 @@ class _RoomLobbyPageState extends ConsumerState<RoomLobbyPage> {
         ));
       case GameType.doudizhu:
         context.push('/doudizhu');
+      case GameType.shengji:
+        final shengjiNotifier = ref.read(shengjiNotifierProvider.notifier);
+        final adapter = ShengjiNetworkAdapter(
+          incomingStream: incomingStream,
+          broadcastFn: broadcastFn,
+          notifier: shengjiNotifier,
+          isHost: isHost,
+          localPlayerId: localPlayerId,
+        );
+        adapter.start();
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => ShengjiPage(isOnline: true, networkAdapter: adapter),
+        ));
     }
   }
 }

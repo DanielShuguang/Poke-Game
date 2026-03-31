@@ -188,7 +188,7 @@ class HomePage extends ConsumerWidget {
 
   /// 是否支持联机对战（斗地主、德州扑克、炸金花、21点、斗牛）
   bool _supportsOnline(String gameId) {
-    return gameId == 'doudizhu' || gameId == 'texas-holdem' || gameId == 'zhajinhua' || gameId == 'blackjack' || gameId == 'niuniu';
+    return gameId == 'doudizhu' || gameId == 'texas-holdem' || gameId == 'zhajinhua' || gameId == 'blackjack' || gameId == 'niuniu' || gameId == 'shengji';
   }
 
   void _handleGameTap(BuildContext context, GameInfo game) {

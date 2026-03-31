@@ -31,6 +31,9 @@ enum GameType {
 
   /// 斗牛
   niuniu,
+
+  /// 升级
+  shengji,
 }
 
 /// 游戏类型扩展
@@ -48,6 +51,8 @@ extension GameTypeX on GameType {
         return '21点';
       case GameType.niuniu:
         return '斗牛';
+      case GameType.shengji:
+        return '升级';
     }
   }
 
@@ -56,6 +61,8 @@ extension GameTypeX on GameType {
     switch (this) {
       case GameType.doudizhu:
         return 3;
+      case GameType.shengji:
+        return 4;
       case GameType.texasHoldem:
       case GameType.zhajinhua:
       case GameType.blackjack:
@@ -69,6 +76,8 @@ extension GameTypeX on GameType {
     switch (this) {
       case GameType.doudizhu:
         return 3;
+      case GameType.shengji:
+        return 4;
       case GameType.texasHoldem:
         return 2;
       case GameType.zhajinhua:
@@ -85,6 +94,8 @@ extension GameTypeX on GameType {
     switch (this) {
       case GameType.doudizhu:
         return 3;
+      case GameType.shengji:
+        return 4;
       case GameType.texasHoldem:
         return 9;
       case GameType.zhajinhua:

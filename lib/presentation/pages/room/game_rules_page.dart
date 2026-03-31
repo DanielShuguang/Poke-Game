@@ -287,6 +287,23 @@ class GameRulesPage extends StatelessWidget {
             Text('5. 结算：庄家与每位闲家单独比较，按闲家倍率结算筹码（平局庄家优先）'),
           ],
         );
+      case GameType.shengji:
+        return const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('1. 发牌：4人游戏，每人25张，留8张底牌给庄家'),
+            SizedBox(height: 8),
+            Text('2. 叫牌：亮出对子/拖拉机确定庄家和将牌花色'),
+            SizedBox(height: 8),
+            Text('3. 组队：对家为队友，两队对抗'),
+            SizedBox(height: 8),
+            Text('4. 出牌：必须跟同花色，无则可垫牌或杀牌（出将牌）'),
+            SizedBox(height: 8),
+            Text('5. 计分：5=5分，10/K=10分，共200分'),
+            SizedBox(height: 8),
+            Text('6. 升级：防守队0分大光+3级，≤40分小光+2级，≤80分成功+1级'),
+          ],
+        );
     }
   }
 }

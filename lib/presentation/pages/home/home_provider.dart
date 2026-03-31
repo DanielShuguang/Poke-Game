@@ -60,5 +60,14 @@ List<GameInfo> _getMockGames() {
       category: GameCategory.cardGames,
       route: '/niuniu',
     ),
+    const GameInfo(
+      id: 'shengji',
+      name: '升级',
+      description: '四人组队对抗，支持人机对战',
+      icon: '🎯',
+      status: GameStatus.available,
+      category: GameCategory.cardGames,
+      route: '/shengji',
+    ),
   ];
 }
