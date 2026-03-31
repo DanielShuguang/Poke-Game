@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:poke_game/domain/doudizhu/entities/card.dart';
-import 'package:poke_game/domain/shengji/entities/shengji_card.dart';
 import 'package:poke_game/domain/shengji/entities/shengji_game_state.dart';
 import 'package:poke_game/domain/shengji/validators/call_validator.dart';
 

@@ -1,7 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:poke_game/domain/shengji/entities/shengji_game_state.dart';
-import 'package:poke_game/domain/shengji/entities/shengji_player.dart';
-import 'package:poke_game/domain/shengji/entities/shengji_team.dart';
 import 'package:poke_game/domain/shengji/usecases/settle_round_usecase.dart';
 
 void main() {

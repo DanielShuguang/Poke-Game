@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:poke_game/domain/doudizhu/entities/card.dart';
 import 'package:poke_game/domain/shengji/entities/shengji_card.dart';
-import 'package:poke_game/domain/shengji/entities/trump_info.dart';
 import 'package:poke_game/domain/shengji/validators/call_validator.dart';
 import 'package:poke_game/domain/shengji/ai/strategies/call_strategy.dart';
 
@@ -50,7 +49,7 @@ void main() {
       // 大小王加分，但可能还不够阈值
       final call = strategy.evaluate(hand, 2);
       // 结果取决于具体分数阈值
-      expect(call == null || call != null, isTrue);
+      expect(call, isNotNull); // 结果取决于具体分数阈值，任意非空结果均可接受
     });
 
     test('级牌多提高叫牌意愿', () {

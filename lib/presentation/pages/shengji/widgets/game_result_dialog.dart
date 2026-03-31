@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:poke_game/domain/shengji/entities/shengji_game_state.dart';
-import 'package:poke_game/domain/shengji/entities/shengji_team.dart';
 
 /// 游戏结果对话框
 class GameResultDialog extends StatelessWidget {

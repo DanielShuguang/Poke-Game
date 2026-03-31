@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:poke_game/domain/shengji/entities/shengji_card.dart';
-import 'package:poke_game/domain/shengji/entities/shengji_game_state.dart';
 import 'package:poke_game/domain/shengji/entities/shengji_player.dart';
 
 /// 发牌用例

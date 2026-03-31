@@ -52,7 +52,7 @@ class CardHand extends StatelessWidget {
         border: Border.all(color: Colors.black26),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 2,
             offset: const Offset(1, 1),
           ),

@@ -244,11 +244,13 @@ class ShengjiGameState {
         orElse: () => ShengjiPhase.waiting,
       ),
       players: (json['players'] as List<dynamic>?)
-          ?.map((p) => ShengjiPlayer.fromJson(
-                p as Map<String, dynamic>,
-                loadHand: localPlayerId == null ||
-                    (p as Map<String, dynamic>)['id'] == localPlayerId,
-              ))
+          ?.map((p) {
+            final pm = p as Map<String, dynamic>;
+            return ShengjiPlayer.fromJson(
+              pm,
+              loadHand: localPlayerId == null || pm['id'] == localPlayerId,
+            );
+          })
           .toList() ?? [],
       teams: (json['teams'] as List<dynamic>?)
           ?.map((t) => ShengjiTeam.fromJson(t as Map<String, dynamic>))

@@ -1,5 +1,4 @@
 import 'package:poke_game/domain/shengji/entities/shengji_game_state.dart';
-import 'package:poke_game/domain/shengji/entities/shengji_player.dart';
 import 'package:poke_game/domain/shengji/entities/trump_info.dart';
 import 'package:poke_game/domain/shengji/validators/call_validator.dart';
 
@@ -75,7 +74,8 @@ class CallTrumpUseCase {
     // 如果所有人都跳过，随机选择庄家
     String? dealerId;
     TrumpInfo? trumpInfo;
-    if (allCalledOrPassed && !state.callHistory.containsValue(RegExp(r'[对子|拖拉机|无将]'))) {
+    if (allCalledOrPassed && !newCallHistory.values.any(
+          (v) => v == '对子' || v == '拖拉机' || v == '无将')) {
       // 所有人都不叫，随机选庄家和将牌
       dealerId = state.players[player.seatIndex].id;
       trumpInfo = TrumpInfo(

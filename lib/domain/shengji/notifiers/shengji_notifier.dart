@@ -7,7 +7,6 @@ import 'package:poke_game/domain/shengji/entities/shengji_game_config.dart';
 import 'package:poke_game/domain/shengji/entities/shengji_game_state.dart';
 import 'package:poke_game/domain/shengji/entities/shengji_player.dart';
 import 'package:poke_game/domain/shengji/entities/shengji_team.dart';
-import 'package:poke_game/domain/shengji/entities/trump_info.dart';
 import 'package:poke_game/domain/shengji/usecases/call_trump_usecase.dart';
 import 'package:poke_game/domain/shengji/usecases/deal_cards_usecase.dart';
 import 'package:poke_game/domain/shengji/usecases/play_cards_usecase.dart';
