@@ -26,6 +26,9 @@ import 'package:poke_game/presentation/pages/niuniu/niuniu_page.dart';
 import 'package:poke_game/presentation/pages/niuniu/providers/niuniu_game_notifier.dart';
 import 'package:poke_game/presentation/pages/shengji/shengji_page.dart';
 import 'package:poke_game/domain/shengji/notifiers/shengji_notifier.dart';
+import 'package:poke_game/core/network/pdk_network_adapter.dart';
+import 'package:poke_game/presentation/pages/paodekai/paodekai_page.dart';
+import 'package:poke_game/domain/paodekai/notifiers/pdk_notifier.dart';
 import 'package:poke_game/presentation/shared/game_colors.dart';
 
 /// 等待大厅状态
@@ -765,6 +768,19 @@ class _RoomLobbyPageState extends ConsumerState<RoomLobbyPage> {
         adapter.start();
         Navigator.of(context).push(MaterialPageRoute(
           builder: (_) => ShengjiPage(isOnline: true, networkAdapter: adapter),
+        ));
+      case GameType.paodekai:
+        final pdkNotifier = ref.read(pdkGameProvider.notifier);
+        final adapter = PdkNetworkAdapter(
+          incomingStream: incomingStream,
+          broadcastFn: broadcastFn,
+          notifier: pdkNotifier,
+          isHost: isHost,
+          localPlayerId: localPlayerId,
+        );
+        adapter.start();
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => PaodekaiPage(isOnline: true, networkAdapter: adapter),
         ));
     }
   }

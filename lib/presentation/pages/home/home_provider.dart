@@ -69,5 +69,14 @@ List<GameInfo> _getMockGames() {
       category: GameCategory.cardGames,
       route: '/shengji',
     ),
+    const GameInfo(
+      id: 'paodekai',
+      name: '跑得快',
+      description: '3人竞速，先出完手牌获胜',
+      icon: '🏃',
+      status: GameStatus.available,
+      category: GameCategory.cardGames,
+      route: '/paodekai',
+    ),
   ];
 }

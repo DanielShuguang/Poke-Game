@@ -305,6 +305,29 @@ class GameRulesPage extends StatelessWidget {
             Text('6. 升级：防守队0分大光+3级，≤40分小光+2级，≤80分成功+1级'),
           ],
         );
+      case GameType.paodekai:
+        return const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('跑得快规则：'),
+            SizedBox(height: 8),
+            Text('• 3人游戏，每人18张牌'),
+            SizedBox(height: 8),
+            Text('• 持有♠3的玩家先出，第一手必须包含♠3'),
+            SizedBox(height: 8),
+            Text('• 牌面大小：3<4<5<6<7<8<9<10<J<Q<K<A<2<小王<大王，同点比花色♠>♥>♣>♦'),
+            SizedBox(height: 8),
+            Text('• 牌型：单张、对子、三张、顺子(≥5连续)、连对(≥3对连续)、飞机(≥2组连续三张)'),
+            SizedBox(height: 8),
+            Text('• 炸弹(四张同点)可压任何非炸弹，王炸最大'),
+            SizedBox(height: 8),
+            Text('• 跟牌须同型等长且更大，不能跟则pass'),
+            SizedBox(height: 8),
+            Text('• 所有人pass后，最后出牌者起新轮'),
+            SizedBox(height: 8),
+            Text('• 先出完手牌者获胜（头游+2分，末游-2分）'),
+          ],
+        );
     }
   }
 }

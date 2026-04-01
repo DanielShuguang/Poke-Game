@@ -53,6 +53,7 @@ const _$GameTypeEnumMap = {
   GameType.blackjack: 'blackjack',
   GameType.niuniu: 'niuniu',
   GameType.shengji: 'shengji',
+  GameType.paodekai: 'paodekai',
 };
 
 const _$RoomStatusEnumMap = {

@@ -198,7 +198,8 @@ class HomePage extends ConsumerWidget {
         gameId == 'zhajinhua' ||
         gameId == 'blackjack' ||
         gameId == 'niuniu' ||
-        gameId == 'shengji';
+        gameId == 'shengji' ||
+        gameId == 'paodekai';
   }
 
   void _handleGameTap(BuildContext context, GameInfo game) {

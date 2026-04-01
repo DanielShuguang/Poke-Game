@@ -34,6 +34,9 @@ enum GameType {
 
   /// 升级
   shengji,
+
+  /// 跑得快
+  paodekai,
 }
 
 /// 游戏类型扩展
@@ -53,6 +56,8 @@ extension GameTypeX on GameType {
         return '斗牛';
       case GameType.shengji:
         return '升级';
+      case GameType.paodekai:
+        return '跑得快';
     }
   }
 
@@ -63,6 +68,8 @@ extension GameTypeX on GameType {
         return 3;
       case GameType.shengji:
         return 4;
+      case GameType.paodekai:
+        return 3;
       case GameType.texasHoldem:
       case GameType.zhajinhua:
       case GameType.blackjack:
@@ -86,6 +93,8 @@ extension GameTypeX on GameType {
         return 2;
       case GameType.niuniu:
         return 2;
+      case GameType.paodekai:
+        return 3;
     }
   }
 
@@ -104,6 +113,8 @@ extension GameTypeX on GameType {
         return 7;
       case GameType.niuniu:
         return 6;
+      case GameType.paodekai:
+        return 3;
     }
   }
 
