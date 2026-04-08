@@ -49,8 +49,8 @@ class NormalCallStrategy implements CallStrategy {
 
     for (final card in hand) {
       // 大小王加分
-      if (card.isBigJoker) score += 0.08;
-      if (card.isSmallJoker) score += 0.06;
+      if (card.isBigJoker) score += 0.25;
+      if (card.isSmallJoker) score += 0.20;
 
       // 级牌加分
       if (card.rank == currentLevel) score += 0.04;

@@ -54,6 +54,31 @@ class CallLandlordUseCase {
     // 不叫，检查是否全部不叫
     final newCallCount = state.callCount + 1;
 
+    // 人机模式：若人类玩家（index 0）不叫且只剩一名AI未表态，强制该AI叫地主
+    if (isHumanVsAi &&
+        playerIndex == 0 &&
+        newCallCount == state.players.length - 1) {
+      final forcedAiIndex = state.players.length - 1;
+      final forcedAi = state.players[forcedAiIndex];
+      forcedAi.role = PlayerRole.landlord;
+      forcedAi.handCards = [...forcedAi.handCards, ...state.landlordCards];
+      forcedAi.handCards.sort();
+      for (var i = 0; i < state.players.length; i++) {
+        if (i != forcedAiIndex) {
+          state.players[i].role = PlayerRole.peasant;
+        }
+      }
+      return CallLandlordResult(
+        gameState: state.copyWith(
+          phase: GamePhase.playing,
+          landlordIndex: forcedAiIndex,
+          currentPlayerIndex: forcedAiIndex,
+          lastPlayedCards: null,
+          lastPlayerIndex: null,
+        ),
+      );
+    }
+
     if (newCallCount >= state.players.length) {
       if (isHumanVsAi) {
         // 人机模式：不允许全部不叫，强制最后一名AI（index 末位）叫地主

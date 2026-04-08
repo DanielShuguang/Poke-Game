@@ -107,8 +107,9 @@ class CallValidator {
 
   /// 验证无将叫牌
   static bool _validateNoTrump(List<ShengjiCard> hand, JokerType jokerType) {
-    final jokers = hand.where((c) =>
-        c.isJoker && c.jokerType == jokerType);
+    final jokers = hand.where((c) => c.isJoker && c.jokerType == jokerType);
+    // 单张大王即可叫无将；小王需要两张
+    if (jokerType == JokerType.big) return jokers.isNotEmpty;
     return jokers.length >= 2;
   }
 
