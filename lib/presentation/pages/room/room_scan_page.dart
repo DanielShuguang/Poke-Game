@@ -7,6 +7,7 @@ import 'package:poke_game/domain/lan/entities/room_info.dart';
 import 'package:poke_game/presentation/pages/room/room_lobby_page.dart';
 import 'package:poke_game/presentation/shared/game_colors.dart';
 import 'package:poke_game/presentation/pages/room/room_scan_provider.dart';
+import 'package:poke_game/presentation/pages/settings/settings_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:dio/dio.dart';
 
@@ -524,7 +525,7 @@ class _RoomCard extends ConsumerWidget {
       // 生成玩家信息
       const uuid = Uuid();
       final playerId = uuid.v4();
-      final playerName = '玩家_${playerId.substring(0, 4)}';
+      final playerName = ref.read(settingsProvider).playerName;
 
       // 发送加入请求
       final response = await dio.post(

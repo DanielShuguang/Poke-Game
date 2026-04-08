@@ -5,6 +5,7 @@ import 'package:poke_game/domain/lan/entities/player_identity.dart';
 import 'package:poke_game/domain/lan/entities/room.dart';
 import 'package:poke_game/domain/lan/entities/room_info.dart';
 import 'package:poke_game/presentation/pages/room/room_lobby_page.dart';
+import 'package:poke_game/presentation/pages/settings/settings_provider.dart';
 import 'package:uuid/uuid.dart';
 
 /// 创建房间页面 Provider
@@ -277,6 +278,7 @@ class CreateRoomPage extends ConsumerWidget {
     const uuid = Uuid();
     final roomId = uuid.v4();
     final hostPlayerId = uuid.v4();
+    final settings = ref.read(settingsProvider);
 
     // 人数：固定游戏类型取固定值，否则取用户选择的值
     final maxPlayerCount =
@@ -291,7 +293,7 @@ class CreateRoomPage extends ConsumerWidget {
       players: [
         PlayerIdentity(
           playerId: hostPlayerId,
-          playerName: '房主',
+          playerName: settings.playerName,
           seatNumber: 1,
           status: PlayerStatus.online,
           isHost: true,
