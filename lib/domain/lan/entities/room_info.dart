@@ -75,11 +75,12 @@ extension GameTypeX on GameType {
         return 4;
       case GameType.paodekai:
         return 3;
+      case GameType.guandan:
+        return 4;
       case GameType.texasHoldem:
       case GameType.zhajinhua:
       case GameType.blackjack:
       case GameType.niuniu:
-      case GameType.guandan:
         return null; // 可变人数
     }
   }
