@@ -37,6 +37,9 @@ enum GameType {
 
   /// 跑得快
   paodekai,
+
+  /// 掼蛋
+  guandan,
 }
 
 /// 游戏类型扩展
@@ -58,6 +61,8 @@ extension GameTypeX on GameType {
         return '升级';
       case GameType.paodekai:
         return '跑得快';
+      case GameType.guandan:
+        return '掼蛋';
     }
   }
 
@@ -74,6 +79,7 @@ extension GameTypeX on GameType {
       case GameType.zhajinhua:
       case GameType.blackjack:
       case GameType.niuniu:
+      case GameType.guandan:
         return null; // 可变人数
     }
   }
@@ -95,6 +101,8 @@ extension GameTypeX on GameType {
         return 2;
       case GameType.paodekai:
         return 3;
+      case GameType.guandan:
+        return 4;
     }
   }
 
@@ -115,6 +123,8 @@ extension GameTypeX on GameType {
         return 6;
       case GameType.paodekai:
         return 3;
+      case GameType.guandan:
+        return 4;
     }
   }
 

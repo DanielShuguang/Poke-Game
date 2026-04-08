@@ -29,6 +29,9 @@ import 'package:poke_game/domain/shengji/notifiers/shengji_notifier.dart';
 import 'package:poke_game/core/network/pdk_network_adapter.dart';
 import 'package:poke_game/presentation/pages/paodekai/paodekai_page.dart';
 import 'package:poke_game/domain/paodekai/notifiers/pdk_notifier.dart';
+import 'package:poke_game/core/network/guandan_network_adapter.dart';
+import 'package:poke_game/presentation/pages/guandan/guandan_game_page.dart';
+import 'package:poke_game/domain/guandan/guandan_game_notifier.dart';
 import 'package:poke_game/presentation/shared/game_colors.dart';
 
 /// 等待大厅状态
@@ -781,6 +784,22 @@ class _RoomLobbyPageState extends ConsumerState<RoomLobbyPage> {
         adapter.start();
         Navigator.of(context).push(MaterialPageRoute(
           builder: (_) => PaodekaiPage(isOnline: true, networkAdapter: adapter),
+        ));
+      case GameType.guandan:
+        final guandanNotifier = ref.read(guandanGameProvider.notifier);
+        final guandanAdapter = GuandanNetworkAdapter(
+          incomingStream: incomingStream,
+          broadcastFn: broadcastFn,
+          notifier: guandanNotifier,
+          isHost: isHost,
+          localPlayerId: localPlayerId,
+        );
+        guandanAdapter.start();
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => GuandanGamePage(
+            isOnline: true,
+            networkAdapter: guandanAdapter,
+          ),
         ));
     }
   }

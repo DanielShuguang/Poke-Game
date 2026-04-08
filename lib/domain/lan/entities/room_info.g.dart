@@ -48,6 +48,7 @@ const _$GameTypeEnumMap = {
   GameType.niuniu: 'niuniu',
   GameType.shengji: 'shengji',
   GameType.paodekai: 'paodekai',
+  GameType.guandan: 'guandan',
 };
 
 const _$RoomStatusEnumMap = {

@@ -12,6 +12,7 @@ import 'package:poke_game/presentation/pages/blackjack/blackjack_page.dart';
 import 'package:poke_game/presentation/pages/niuniu/niuniu_page.dart';
 import 'package:poke_game/presentation/pages/shengji/shengji_page.dart';
 import 'package:poke_game/presentation/pages/paodekai/paodekai_page.dart';
+import 'package:poke_game/presentation/pages/guandan/guandan_game_page.dart';
 
 /// 应用路由配置
 final GoRouter appRouter = GoRouter(
@@ -90,6 +91,12 @@ final GoRouter appRouter = GoRouter(
       name: 'paodekai',
       builder: (BuildContext context, GoRouterState state) =>
           const PaodekaiPage(),
+    ),
+    GoRoute(
+      path: '/guandan',
+      name: 'guandan',
+      builder: (BuildContext context, GoRouterState state) =>
+          const GuandanGamePage(),
     ),
   ],
   errorBuilder: (BuildContext context, GoRouterState state) =>

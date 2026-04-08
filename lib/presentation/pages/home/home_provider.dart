@@ -78,5 +78,14 @@ List<GameInfo> _getMockGames() {
       category: GameCategory.cardGames,
       route: '/paodekai',
     ),
+    const GameInfo(
+      id: 'guandan',
+      name: '掼蛋',
+      description: '四人组队，含级牌百搭与贡牌机制',
+      icon: '🃏',
+      status: GameStatus.available,
+      category: GameCategory.cardGames,
+      route: '/guandan',
+    ),
   ];
 }

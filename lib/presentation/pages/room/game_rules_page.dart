@@ -328,6 +328,29 @@ class GameRulesPage extends StatelessWidget {
             Text('• 先出完手牌者获胜（头游+2分，末游-2分）'),
           ],
         );
+      case GameType.guandan:
+        return const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('掼蛋规则：'),
+            SizedBox(height: 8),
+            Text('• 4人游戏，两两组队（座位0&2为队伍0，座位1&3为队伍1）'),
+            SizedBox(height: 8),
+            Text('• 双副牌108张，每人27张'),
+            SizedBox(height: 8),
+            Text('• 级牌：各队有当前级牌（从2升到A），级牌可作万能牌填补顺子间隙'),
+            SizedBox(height: 8),
+            Text('• 牌型：单张、对子、三张、三带二、顺子(≥5)、连对(≥3)、钢板(≥2组三张)、炸弹'),
+            SizedBox(height: 8),
+            Text('• 炸弹大小：天王炸 > 同花顺炸 > 级牌炸 > 普通炸（同类按张数和点数比较）'),
+            SizedBox(height: 8),
+            Text('• 头游队胜：头游(+1)，双升(+2)，大光(+3)，相应降级降档'),
+            SizedBox(height: 8),
+            Text('• 贡牌：输方需向赢方进贡最大单张，赢方还贡一张'),
+            SizedBox(height: 8),
+            Text('• 升到A后再次满足升级条件即获胜'),
+          ],
+        );
     }
   }
 }
