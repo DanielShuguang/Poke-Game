@@ -22,11 +22,13 @@ import 'package:poke_game/presentation/shared/widgets/game_back_button.dart';
 class ShengjiPage extends ConsumerStatefulWidget {
   final bool isOnline;
   final ShengjiNetworkAdapter? networkAdapter;
+  final int turnTimeLimit;
 
   const ShengjiPage({
     super.key,
     this.isOnline = false,
     this.networkAdapter,
+    this.turnTimeLimit = 35,
   });
 
   @override
@@ -164,7 +166,7 @@ class _ShengjiPageState extends ConsumerState<ShengjiPage> {
   }
 
   void _startCountdown() {
-    _countdown = 35;
+    _countdown = widget.turnTimeLimit;
     _countdownTimer?.cancel();
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_countdown > 0) {

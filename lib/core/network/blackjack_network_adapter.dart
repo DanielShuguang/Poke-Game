@@ -24,12 +24,15 @@ class BlackjackNetworkAdapter {
   Timer? _timeoutTimer;
   String? _watchedPlayerId;
 
+  final int turnTimeLimit;
+
   BlackjackNetworkAdapter({
     required this.incomingStream,
     required this.broadcastFn,
     required BlackjackGameNotifier notifier,
     required this.isHost,
     required this.localPlayerId,
+    this.turnTimeLimit = 35,
   }) : _notifier = notifier;
 
   void start() {
@@ -110,7 +113,7 @@ class BlackjackNetworkAdapter {
     if (current == null) return;
     _watchedPlayerId = current.id;
 
-    _timeoutTimer = Timer(const Duration(seconds: 35), () {
+    _timeoutTimer = Timer(Duration(seconds: turnTimeLimit), () {
       final watched = _watchedPlayerId;
       if (watched == null) return;
       final activePlayer = _notifier.currentState.currentPlayer;

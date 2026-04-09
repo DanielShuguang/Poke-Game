@@ -21,11 +21,13 @@ import 'package:poke_game/presentation/shared/widgets/game_back_button.dart';
 class PaodekaiPage extends ConsumerStatefulWidget {
   final bool isOnline;
   final PdkNetworkAdapter? networkAdapter;
+  final int turnTimeLimit;
 
   const PaodekaiPage({
     super.key,
     this.isOnline = false,
     this.networkAdapter,
+    this.turnTimeLimit = 35,
   });
 
   @override
@@ -201,7 +203,7 @@ class _PaodekaiPageState extends ConsumerState<PaodekaiPage> {
   }
 
   void _startCountdown() {
-    _countdown = 35;
+    _countdown = widget.turnTimeLimit;
     _countdownTimer?.cancel();
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {

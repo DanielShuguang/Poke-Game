@@ -28,12 +28,15 @@ class ZhjNetworkAdapter {
   /// 当前监听的玩家 ID（用于超时检测）
   String? _watchedPlayerId;
 
+  final int turnTimeLimit;
+
   ZhjNetworkAdapter({
     required this.incomingStream,
     required this.broadcastFn,
     required ZhjGameNotifier notifier,
     required this.isHost,
     required this.localPlayerId,
+    this.turnTimeLimit = 35,
   }) : _notifier = notifier;
 
   /// 开始监听网络消息
@@ -143,7 +146,7 @@ class ZhjNetworkAdapter {
     if (currentId == localPlayerId) return;
 
     _watchedPlayerId = currentId;
-    _timeoutTimer = Timer(const Duration(seconds: 35), () {
+    _timeoutTimer = Timer(Duration(seconds: turnTimeLimit), () {
       if (_watchedPlayerId == null) return;
       final s = _notifier.currentState;
       if (s.phase != ZhjGamePhase.betting) return;

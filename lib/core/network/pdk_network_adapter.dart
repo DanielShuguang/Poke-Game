@@ -24,12 +24,15 @@ class PdkNetworkAdapter {
   Timer? _timeoutTimer;
   String? _watchedPlayerId;
 
+  final int turnTimeLimit;
+
   PdkNetworkAdapter({
     required this.incomingStream,
     required this.broadcastFn,
     required PdkGameNotifier notifier,
     required this.isHost,
     required this.localPlayerId,
+    this.turnTimeLimit = 35,
   }) : _notifier = notifier;
 
   void start() {
@@ -115,7 +118,7 @@ class PdkNetworkAdapter {
     final currentPlayer = state.currentPlayer;
     _watchedPlayerId = currentPlayer.id;
 
-    _timeoutTimer = Timer(const Duration(seconds: 35), () {
+    _timeoutTimer = Timer(Duration(seconds: turnTimeLimit), () {
       final watched = _watchedPlayerId;
       if (watched == null) return;
       final current = _notifier.currentState;

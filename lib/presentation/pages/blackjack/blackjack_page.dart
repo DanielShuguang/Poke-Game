@@ -16,11 +16,13 @@ import 'package:poke_game/presentation/shared/widgets/game_back_button.dart';
 class BlackjackPage extends ConsumerStatefulWidget {
   final bool isOnline;
   final BlackjackNetworkAdapter? networkAdapter;
+  final int turnTimeLimit;
 
   const BlackjackPage({
     super.key,
     this.isOnline = false,
     this.networkAdapter,
+    this.turnTimeLimit = 35,
   });
 
   @override

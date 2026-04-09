@@ -26,6 +26,7 @@ class CreateRoomFormData {
   final int maxPlayers;
   final bool hasPassword;
   final String password;
+  final int turnTimeLimit;
 
   CreateRoomFormData({
     required this.roomName,
@@ -33,6 +34,7 @@ class CreateRoomFormData {
     required this.maxPlayers,
     required this.hasPassword,
     required this.password,
+    this.turnTimeLimit = 35,
   });
 
   CreateRoomFormData copyWith({
@@ -41,6 +43,7 @@ class CreateRoomFormData {
     int? maxPlayers,
     bool? hasPassword,
     String? password,
+    int? turnTimeLimit,
   }) {
     return CreateRoomFormData(
       roomName: roomName ?? this.roomName,
@@ -48,6 +51,7 @@ class CreateRoomFormData {
       maxPlayers: maxPlayers ?? this.maxPlayers,
       hasPassword: hasPassword ?? this.hasPassword,
       password: password ?? this.password,
+      turnTimeLimit: turnTimeLimit ?? this.turnTimeLimit,
     );
   }
 }
@@ -76,6 +80,8 @@ class CreateRoomPage extends ConsumerWidget {
             _buildPasswordSection(context, ref, formData),
             const SizedBox(height: 24),
             _buildPlayerCountConfig(context, ref, formData),
+            const SizedBox(height: 16),
+            _buildTurnTimeLimitSelector(context, ref, formData),
             const SizedBox(height: 32),
             _buildCreateButton(context, ref, formData),
           ],
@@ -238,6 +244,52 @@ class CreateRoomPage extends ConsumerWidget {
     );
   }
 
+  Widget _buildTurnTimeLimitSelector(
+    BuildContext context,
+    WidgetRef ref,
+    CreateRoomFormData formData,
+  ) {
+    const options = [15, 25, 35, 60];
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.timer_outlined),
+                const SizedBox(width: 8),
+                Text(
+                  '回合时限',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: options.map((seconds) {
+                final isSelected = formData.turnTimeLimit == seconds;
+                return ChoiceChip(
+                  label: Text('$seconds 秒'),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    if (selected) {
+                      ref.read(createRoomFormProvider.notifier).state =
+                          formData.copyWith(turnTimeLimit: seconds);
+                    }
+                  },
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildCreateButton(
     BuildContext context,
     WidgetRef ref,
@@ -303,7 +355,7 @@ class CreateRoomPage extends ConsumerWidget {
       ],
       status: RoomStatus.waiting,
       maxPlayerCount: maxPlayerCount,
-      gameConfig: {},
+      gameConfig: {'turnTimeLimit': formData.turnTimeLimit},
       createdAt: DateTime.now(),
       password: formData.hasPassword ? formData.password : null,
     );

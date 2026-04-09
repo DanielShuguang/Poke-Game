@@ -39,6 +39,9 @@ void navigateToGame(
       ? lobbyNotifier.hostGameStream
       : lobbyNotifier.clientGameStream;
 
+  final turnTimeLimit =
+      (room.gameConfig['turnTimeLimit'] as int?) ?? 35;
+
   void broadcastFn(Map<String, dynamic> msg) {
     if (isHost) {
       lobbyNotifier.broadcastGameMessage(msg);
@@ -56,11 +59,12 @@ void navigateToGame(
         notifier: holdemNotifier,
         isHost: isHost,
         localPlayerId: localPlayerId,
+        turnTimeLimit: turnTimeLimit,
       );
       adapter.start();
       Navigator.of(context).push(MaterialPageRoute(
         builder: (_) =>
-            HoldemGamePage(isOnline: true, networkAdapter: adapter),
+            HoldemGamePage(isOnline: true, networkAdapter: adapter, turnTimeLimit: turnTimeLimit),
       ));
     case GameType.zhajinhua:
       final zhjNotifier = ref.read(zhjGameProvider.notifier);
@@ -70,11 +74,12 @@ void navigateToGame(
         notifier: zhjNotifier,
         isHost: isHost,
         localPlayerId: localPlayerId,
+        turnTimeLimit: turnTimeLimit,
       );
       adapter.start();
       Navigator.of(context).push(MaterialPageRoute(
         builder: (_) =>
-            ZhajinhuaPage(isOnline: true, networkAdapter: adapter),
+            ZhajinhuaPage(isOnline: true, networkAdapter: adapter, turnTimeLimit: turnTimeLimit),
       ));
     case GameType.blackjack:
       final bjNotifier = ref.read(blackjackGameProvider.notifier);
@@ -84,11 +89,12 @@ void navigateToGame(
         notifier: bjNotifier,
         isHost: isHost,
         localPlayerId: localPlayerId,
+        turnTimeLimit: turnTimeLimit,
       );
       adapter.start();
       Navigator.of(context).push(MaterialPageRoute(
         builder: (_) =>
-            BlackjackPage(isOnline: true, networkAdapter: adapter),
+            BlackjackPage(isOnline: true, networkAdapter: adapter, turnTimeLimit: turnTimeLimit),
       ));
     case GameType.niuniu:
       final nnNotifier = ref.read(niuniuGameProvider.notifier);
@@ -98,10 +104,11 @@ void navigateToGame(
         notifier: nnNotifier,
         isHost: isHost,
         localPlayerId: localPlayerId,
+        turnTimeLimit: turnTimeLimit,
       );
       adapter.start();
       Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => NiuniuPage(isOnline: true, networkAdapter: adapter),
+        builder: (_) => NiuniuPage(isOnline: true, networkAdapter: adapter, turnTimeLimit: turnTimeLimit),
       ));
     case GameType.doudizhu:
       context.push('/doudizhu');
@@ -113,11 +120,12 @@ void navigateToGame(
         notifier: shengjiNotifier,
         isHost: isHost,
         localPlayerId: localPlayerId,
+        turnTimeLimit: turnTimeLimit,
       );
       adapter.start();
       Navigator.of(context).push(MaterialPageRoute(
         builder: (_) =>
-            ShengjiPage(isOnline: true, networkAdapter: adapter),
+            ShengjiPage(isOnline: true, networkAdapter: adapter, turnTimeLimit: turnTimeLimit),
       ));
     case GameType.paodekai:
       final pdkNotifier = ref.read(pdkGameProvider.notifier);
@@ -127,11 +135,12 @@ void navigateToGame(
         notifier: pdkNotifier,
         isHost: isHost,
         localPlayerId: localPlayerId,
+        turnTimeLimit: turnTimeLimit,
       );
       adapter.start();
       Navigator.of(context).push(MaterialPageRoute(
         builder: (_) =>
-            PaodekaiPage(isOnline: true, networkAdapter: adapter),
+            PaodekaiPage(isOnline: true, networkAdapter: adapter, turnTimeLimit: turnTimeLimit),
       ));
     case GameType.guandan:
       final guandanNotifier = ref.read(guandanGameProvider.notifier);
@@ -141,12 +150,14 @@ void navigateToGame(
         notifier: guandanNotifier,
         isHost: isHost,
         localPlayerId: localPlayerId,
+        turnTimeLimit: turnTimeLimit,
       );
       guandanAdapter.start();
       Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => GuandanGamePage(
           isOnline: true,
           networkAdapter: guandanAdapter,
+          turnTimeLimit: turnTimeLimit,
         ),
       ));
   }

@@ -19,10 +19,13 @@ class HoldemGamePage extends ConsumerStatefulWidget {
   /// 联机网络适配器（联机模式时提供）
   final HoldemNetworkAdapter? networkAdapter;
 
+  final int turnTimeLimit;
+
   const HoldemGamePage({
     super.key,
     this.isOnline = false,
     this.networkAdapter,
+    this.turnTimeLimit = 35,
   });
 
   @override

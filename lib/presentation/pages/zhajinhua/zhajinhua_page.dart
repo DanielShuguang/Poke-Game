@@ -18,10 +18,13 @@ class ZhajinhuaPage extends ConsumerStatefulWidget {
   /// 联机网络适配器（联机模式时提供）
   final ZhjNetworkAdapter? networkAdapter;
 
+  final int turnTimeLimit;
+
   const ZhajinhuaPage({
     super.key,
     this.isOnline = false,
     this.networkAdapter,
+    this.turnTimeLimit = 35,
   });
 
   @override

@@ -17,7 +17,12 @@ import 'package:poke_game/presentation/shared/widgets/game_back_button.dart';
 
 /// 斗地主游戏页面
 class DoudizhuGamePage extends ConsumerStatefulWidget {
-  const DoudizhuGamePage({super.key});
+  final int turnTimeLimit;
+
+  const DoudizhuGamePage({
+    super.key,
+    this.turnTimeLimit = 35,
+  });
 
   @override
   ConsumerState<DoudizhuGamePage> createState() => _DoudizhuGamePageState();

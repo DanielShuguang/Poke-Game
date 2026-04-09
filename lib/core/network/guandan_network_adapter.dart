@@ -19,6 +19,7 @@ class GuandanNetworkAdapter {
   final GuandanGameNotifier _notifier;
   final bool isHost;
   final String localPlayerId;
+  final int turnTimeLimit;
 
   StreamSubscription? _sub;
   Timer? _timeoutTimer;
@@ -30,6 +31,7 @@ class GuandanNetworkAdapter {
     required GuandanGameNotifier notifier,
     required this.isHost,
     required this.localPlayerId,
+    this.turnTimeLimit = 35,
   }) : _notifier = notifier;
 
   void start() {
@@ -142,7 +144,7 @@ class GuandanNetworkAdapter {
 
     _watchedPlayerId = watchId;
 
-    _timeoutTimer = Timer(const Duration(seconds: 35), () {
+    _timeoutTimer = Timer(Duration(seconds: turnTimeLimit), () {
       final watched = _watchedPlayerId;
       if (watched == null) return;
 

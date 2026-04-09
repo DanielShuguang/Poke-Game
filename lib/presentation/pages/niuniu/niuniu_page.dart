@@ -17,11 +17,13 @@ import 'package:poke_game/presentation/shared/widgets/game_back_button.dart';
 class NiuniuPage extends ConsumerStatefulWidget {
   final bool isOnline;
   final NiuniuNetworkAdapter? networkAdapter;
+  final int turnTimeLimit;
 
   const NiuniuPage({
     super.key,
     this.isOnline = false,
     this.networkAdapter,
+    this.turnTimeLimit = 35,
   });
 
   @override

@@ -25,12 +25,15 @@ class NiuniuNetworkAdapter {
   Timer? _timeoutTimer;
   String? _watchedPlayerId;
 
+  final int turnTimeLimit;
+
   NiuniuNetworkAdapter({
     required this.incomingStream,
     required this.broadcastFn,
     required NiuniuGameNotifier notifier,
     required this.isHost,
     required this.localPlayerId,
+    this.turnTimeLimit = 35,
   }) : _notifier = notifier;
 
   void start() {
@@ -119,7 +122,7 @@ class NiuniuNetworkAdapter {
     if (nextWaiting == null) return;
     _watchedPlayerId = nextWaiting.id;
 
-    _timeoutTimer = Timer(const Duration(seconds: 35), () {
+    _timeoutTimer = Timer(Duration(seconds: turnTimeLimit), () {
       final watched = _watchedPlayerId;
       if (watched == null) return;
       final player = _notifier.currentState.players

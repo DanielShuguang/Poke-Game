@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,11 +20,13 @@ import 'package:poke_game/presentation/shared/game_colors.dart';
 class GuandanGamePage extends ConsumerStatefulWidget {
   final bool isOnline;
   final GuandanNetworkAdapter? networkAdapter;
+  final int turnTimeLimit;
 
   const GuandanGamePage({
     super.key,
     this.isOnline = false,
     this.networkAdapter,
+    this.turnTimeLimit = 35,
   });
 
   @override
@@ -31,6 +35,8 @@ class GuandanGamePage extends ConsumerStatefulWidget {
 
 class _GuandanGamePageState extends ConsumerState<GuandanGamePage> {
   final Set<int> _selectedIndices = {};
+  int _countdown = 0;
+  Timer? _countdownTimer;
 
   String get localId =>
       widget.isOnline
@@ -61,9 +67,88 @@ class _GuandanGamePageState extends ConsumerState<GuandanGamePage> {
 
   @override
   void dispose() {
+    _countdownTimer?.cancel();
     SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     widget.networkAdapter?.stop();
     super.dispose();
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // 倒计时
+  // ──────────────────────────────────────────────────────────────
+
+  void _startCountdown() {
+    _countdown = widget.turnTimeLimit;
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      if (_countdown > 0) {
+        setState(() => _countdown--);
+      } else {
+        _stopCountdown();
+        if (!widget.isOnline) _autoPlayOnTimeout();
+      }
+    });
+  }
+
+  void _stopCountdown() {
+    _countdownTimer?.cancel();
+    _countdownTimer = null;
+    if (mounted && _countdown != 0) setState(() => _countdown = 0);
+  }
+
+  void _updateCountdown(GuandanGameState state) {
+    final needCountdown = _isLocalActionNeeded(state);
+    if (needCountdown && _countdown == 0) {
+      _startCountdown();
+    } else if (!needCountdown && _countdown > 0) {
+      _stopCountdown();
+    }
+  }
+
+  bool _isLocalActionNeeded(GuandanGameState state) {
+    if (state.phase == GuandanPhase.playing) {
+      return state.players.isNotEmpty && state.currentPlayer.id == localId;
+    }
+    if (state.phase == GuandanPhase.tribute) {
+      final ts = state.tributeState;
+      return ts != null && ts.pendingTributes.containsKey(localId);
+    }
+    if (state.phase == GuandanPhase.returnTribute) {
+      final ts = state.tributeState;
+      return ts != null && ts.pendingReturnTributes.containsKey(localId);
+    }
+    return false;
+  }
+
+  void _autoPlayOnTimeout() {
+    final notifier = ref.read(guandanGameProvider.notifier);
+    final state = ref.read(guandanGameProvider);
+
+    if (state.phase == GuandanPhase.playing) {
+      if (state.lastPlayedHand == null) {
+        notifier.forcePlayCards(localId);
+      } else {
+        notifier.forcePass(localId);
+      }
+    } else if (state.phase == GuandanPhase.tribute) {
+      final player = state.getPlayerById(localId);
+      if (player != null) {
+        final nonJokers = player.cards
+            .where((c) => !c.isJoker)
+            .toList()
+          ..sort((a, b) => b.rank!.compareTo(a.rank!));
+        if (nonJokers.isNotEmpty) notifier.tribute(localId, nonJokers.first);
+      }
+    } else if (state.phase == GuandanPhase.returnTribute) {
+      final player = state.getPlayerById(localId);
+      if (player != null && player.cards.isNotEmpty) {
+        notifier.returnTribute(localId, player.cards.first);
+      }
+    }
   }
 
   // ──────────────────────────────────────────────────────────────
@@ -85,6 +170,7 @@ class _GuandanGamePageState extends ConsumerState<GuandanGamePage> {
       ref.read(guandanGameProvider.notifier).playCards(localId, selected);
     }
     setState(() => _selectedIndices.clear());
+    _stopCountdown();
   }
 
   void _onPass(GuandanGameState state) {
@@ -94,6 +180,7 @@ class _GuandanGamePageState extends ConsumerState<GuandanGamePage> {
       ref.read(guandanGameProvider.notifier).pass(localId);
     }
     setState(() => _selectedIndices.clear());
+    _stopCountdown();
   }
 
   void _onHint(GuandanGameState state) {
@@ -117,6 +204,7 @@ class _GuandanGamePageState extends ConsumerState<GuandanGamePage> {
   }
 
   void _onTribute(GuandanCard card) {
+    _stopCountdown();
     if (widget.isOnline) {
       widget.networkAdapter?.sendAction(
         TributeNetworkAction(card: card, playerId: localId),
@@ -127,6 +215,7 @@ class _GuandanGamePageState extends ConsumerState<GuandanGamePage> {
   }
 
   void _onReturnTribute(GuandanCard card) {
+    _stopCountdown();
     if (widget.isOnline) {
       widget.networkAdapter?.sendAction(
         ReturnTributeNetworkAction(card: card, playerId: localId),
@@ -177,6 +266,10 @@ class _GuandanGamePageState extends ConsumerState<GuandanGamePage> {
     final state = ref.watch(guandanGameProvider);
     final colors = context.gameColors;
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _updateCountdown(state);
+    });
+
     final localPlayer = state.getPlayerById(localId);
     final isLocalTurn = localPlayer != null &&
         state.players.isNotEmpty &&
@@ -208,16 +301,46 @@ class _GuandanGamePageState extends ConsumerState<GuandanGamePage> {
 
                             // 中央出牌区
                             Expanded(
-                              child: GuandanPlayAreaWidget(
-                                state: state,
-                                selectedIndices: _selectedIndices,
-                                localHand: localPlayer?.cards ?? [],
-                                isLocalTurn: isLocalTurn,
-                                canPlay: isLocalTurn && _canPlay(state, localPlayer),
-                                canPass: isLocalTurn && state.lastPlayedHand != null,
-                                onPlay: () => _onPlay(state),
-                                onPass: () => _onPass(state),
-                                onHint: () => _onHint(state),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (_isLocalActionNeeded(state) &&
+                                      _countdown > 0)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 4),
+                                      margin: const EdgeInsets.only(bottom: 4),
+                                      decoration: BoxDecoration(
+                                        color: _countdown <= 10
+                                            ? colors.dangerRed
+                                            : colors.accentAmber,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        '$_countdown 秒',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  Expanded(
+                                    child: GuandanPlayAreaWidget(
+                                      state: state,
+                                      selectedIndices: _selectedIndices,
+                                      localHand: localPlayer?.cards ?? [],
+                                      isLocalTurn: isLocalTurn,
+                                      canPlay: isLocalTurn &&
+                                          _canPlay(state, localPlayer),
+                                      canPass: isLocalTurn &&
+                                          state.lastPlayedHand != null,
+                                      onPlay: () => _onPlay(state),
+                                      onPass: () => _onPass(state),
+                                      onHint: () => _onHint(state),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
 

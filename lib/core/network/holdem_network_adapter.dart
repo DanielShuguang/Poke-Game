@@ -23,12 +23,15 @@ class HoldemNetworkAdapter {
 
   StreamSubscription? _messageSub;
 
+  final int turnTimeLimit;
+
   HoldemNetworkAdapter({
     required this.incomingStream,
     required this.broadcastFn,
     required HoldemGameNotifier notifier,
     required this.isHost,
     required this.localPlayerId,
+    this.turnTimeLimit = 35,
   }) : _notifier = notifier;
 
   /// 开始监听网络消息
