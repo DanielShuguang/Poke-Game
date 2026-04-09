@@ -1,340 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:logger/logger.dart';
-import 'package:poke_game/core/network/blackjack_network_adapter.dart';
-import 'package:poke_game/core/network/holdem_network_adapter.dart';
-import 'package:poke_game/core/network/network_environment_checker.dart';
-import 'package:poke_game/core/network/room_http_server.dart';
-import 'package:poke_game/core/network/room_state_sync_service.dart';
-import 'package:poke_game/core/network/udp_broadcaster.dart';
-import 'package:poke_game/core/network/websocket_client.dart';
-import 'package:poke_game/core/network/websocket_manager.dart';
-import 'package:poke_game/core/network/zhj_network_adapter.dart';
-import 'package:poke_game/core/network/shengji_network_adapter.dart';
 import 'package:poke_game/domain/lan/entities/player_identity.dart';
 import 'package:poke_game/domain/lan/entities/room.dart';
 import 'package:poke_game/domain/lan/entities/room_info.dart';
-import 'package:poke_game/presentation/pages/texas_holdem/holdem_game_page.dart';
-import 'package:poke_game/presentation/pages/texas_holdem/holdem_provider.dart';
-import 'package:poke_game/presentation/pages/zhajinhua/providers/zhj_game_provider.dart';
-import 'package:poke_game/presentation/pages/zhajinhua/zhajinhua_page.dart';
-import 'package:poke_game/presentation/pages/blackjack/blackjack_page.dart';
-import 'package:poke_game/presentation/pages/blackjack/providers/blackjack_game_notifier.dart';
-import 'package:poke_game/core/network/niuniu_network_adapter.dart';
-import 'package:poke_game/presentation/pages/niuniu/niuniu_page.dart';
-import 'package:poke_game/presentation/pages/niuniu/providers/niuniu_game_notifier.dart';
-import 'package:poke_game/presentation/pages/shengji/shengji_page.dart';
-import 'package:poke_game/domain/shengji/notifiers/shengji_notifier.dart';
-import 'package:poke_game/core/network/pdk_network_adapter.dart';
-import 'package:poke_game/presentation/pages/paodekai/paodekai_page.dart';
-import 'package:poke_game/domain/paodekai/notifiers/pdk_notifier.dart';
-import 'package:poke_game/core/network/guandan_network_adapter.dart';
-import 'package:poke_game/presentation/pages/guandan/guandan_game_page.dart';
-import 'package:poke_game/domain/guandan/guandan_game_notifier.dart';
 import 'package:poke_game/presentation/shared/game_colors.dart';
 
-/// 等待大厅状态
-class LobbyState {
-  final Room? room;
-  final String? currentPlayerId;
-  final bool isStarting;
-
-  const LobbyState({
-    this.room,
-    this.currentPlayerId,
-    this.isStarting = false,
-  });
-
-  /// 是否是房主
-  bool get isHost => room?.hostPlayerId == currentPlayerId;
-
-  /// 当前玩家
-  PlayerIdentity? get currentPlayer {
-    if (room == null || currentPlayerId == null) return null;
-    try {
-      return room!.players.firstWhere((p) => p.playerId == currentPlayerId);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  LobbyState copyWith({
-    Room? room,
-    String? currentPlayerId,
-    bool? isStarting,
-  }) {
-    return LobbyState(
-      room: room ?? this.room,
-      currentPlayerId: currentPlayerId ?? this.currentPlayerId,
-      isStarting: isStarting ?? this.isStarting,
-    );
-  }
-}
-
-/// 等待大厅 Provider
-final lobbyProvider = StateNotifierProvider<LobbyNotifier, LobbyState>((ref) {
-  return LobbyNotifier();
-});
-
-/// 等待大厅 Notifier
-class LobbyNotifier extends StateNotifier<LobbyState> {
-  final Logger _logger = Logger();
-
-  /// WebSocket 管理器（房主端）
-  WebSocketManager? _webSocketManager;
-
-  /// WebSocket 客户端（客户端模式）
-  WebSocketClient? _wsClient;
-
-  /// 状态同步服务（房主端）
-  RoomStateSyncService? _syncService;
-
-  /// HTTP 服务器（房主端）
-  RoomHttpServer? _httpServer;
-
-  /// 是否是房主模式
-  bool _isHostMode = false;
-
-  LobbyNotifier() : super(const LobbyState());
-
-  /// 初始化房主模式
-  Future<void> initHostMode(Room room, String currentPlayerId) async {
-    _isHostMode = true;
-
-    // 初始化 WebSocket 管理器
-    _webSocketManager = WebSocketManager();
-
-    // 初始化 UDP 广播器
-    final udpBroadcaster = UdpBroadcaster();
-
-    // 初始化状态同步服务
-    _syncService = RoomStateSyncService(
-      udpBroadcaster: udpBroadcaster,
-      webSocketManager: _webSocketManager!,
-    );
-
-    // 初始化 HTTP 服务器
-    _httpServer = RoomHttpServer(
-      httpPort: 8080,
-      webSocketPort: 8082,
-    );
-
-    // 设置回调
-    _httpServer!.onGetRoomInfo = () async {
-      return room.toJson();
-    };
-
-    _httpServer!.onPlayerJoin = (playerId, playerName) async {
-      // 添加玩家到房间
-      final newPlayer = PlayerIdentity(
-        playerId: playerId,
-        playerName: playerName,
-        seatNumber: room.players.length + 1,
-        status: PlayerStatus.online,
-        joinedAt: DateTime.now(),
-        lastActiveAt: DateTime.now(),
-      );
-
-      final updatedRoom = room.copyWith(
-        players: [...room.players, newPlayer],
-      );
-
-      state = state.copyWith(room: updatedRoom);
-
-      // 广播玩家加入
-      _syncService?.broadcastPlayerJoined(playerName, newPlayer.seatNumber);
-
-      return {'success': true, 'playerId': playerId};
-    };
-
-    _httpServer!.onWebSocketConnect = (webSocket, playerId) {
-      _webSocketManager!.addConnection(webSocket, playerId: playerId);
-    };
-
-    // 启动服务器
-    await _httpServer!.start();
-
-    // 获取网络地址
-    final networkChecker = NetworkEnvironmentChecker();
-    final result = await networkChecker.checkEnvironment();
-
-    // 开始广播房间
-    _syncService!.startBroadcasting(
-      room,
-      result.localIp ?? 'unknown',
-      'Host Device',
-    );
-
-    _logger.i('房主模式已初始化');
-  }
-
-  /// 初始化客户端模式
-  Future<void> initClientMode(Room room, String currentPlayerId) async {
-    _isHostMode = false;
-    state = state.copyWith(room: room, currentPlayerId: currentPlayerId);
-
-    // 如果房间有网络地址，初始化 WebSocket 客户端
-    // 注意：这里需要从 RoomInfo 获取网络地址
-    // 暂时跳过 WebSocket 连接
-    _logger.i('客户端模式已初始化');
-  }
-
-  /// 初始化客户端模式（带 WebSocket 连接）
-  Future<void> initClientModeWithWebSocket(
-    Room room,
-    String currentPlayerId,
-    String serverAddress,
-  ) async {
-    _isHostMode = false;
-    state = state.copyWith(room: room, currentPlayerId: currentPlayerId);
-
-    // 初始化 WebSocket 客户端
-    _wsClient = WebSocketClient(
-      serverAddress: serverAddress,
-      port: 8082,
-    );
-
-    // 连接到房主的 WebSocket 服务器
-    final connected = await _wsClient!.connect();
-    if (connected) {
-      _logger.i('客户端 WebSocket 已连接: $serverAddress:8082');
-    } else {
-      _logger.w('客户端 WebSocket 连接失败');
-    }
-  }
-
-  void setRoom(Room room, String currentPlayerId) {
-    state = state.copyWith(room: room, currentPlayerId: currentPlayerId);
-  }
-
-  void toggleReady() {
-    if (state.currentPlayerId == null || state.room == null) return;
-
-    final currentPlayer = state.currentPlayer;
-    if (currentPlayer == null) return;
-
-    final newStatus = currentPlayer.status == PlayerStatus.ready
-        ? PlayerStatus.online
-        : PlayerStatus.ready;
-
-    // 更新本地状态
-    final players = state.room!.players.map((p) {
-      if (p.playerId == state.currentPlayerId) {
-        return p.copyWith(status: newStatus);
-      }
-      return p;
-    }).toList();
-
-    state = state.copyWith(
-      room: state.room!.copyWith(players: players),
-    );
-
-    // 发送状态变更到服务器/广播
-    if (_isHostMode && _syncService != null) {
-      _syncService!.broadcastPlayerStatusChanged(
-        state.currentPlayerId!,
-        newStatus.name,
-      );
-    }
-
-    _logger.i('玩家状态变更: ${state.currentPlayerId} -> $newStatus');
-  }
-
-  void startGame() {
-    if (!state.isHost) return;
-    state = state.copyWith(isStarting: true);
-
-    // 发送开始游戏消息
-    if (_syncService != null) {
-      _syncService!.broadcastGameStarted();
-    }
-
-    _logger.i('游戏开始');
-  }
-
-  /// Host 广播游戏状态（供 NetworkAdapter 调用）
-  void broadcastGameMessage(Map<String, dynamic> msg) {
-    _webSocketManager?.broadcast(msg);
-  }
-
-  /// Host 游戏消息流（来自客户端）
-  Stream<Map<String, dynamic>> get hostGameStream {
-    if (_webSocketManager == null) return const Stream.empty();
-    return _webSocketManager!.dataStream;
-  }
-
-  /// Client 游戏消息流（来自 Host）
-  Stream<Map<String, dynamic>> get clientGameStream {
-    return _wsClient?.messageStream ?? const Stream.empty();
-  }
-
-  /// Client 发送消息给 Host
-  void sendGameMessage(Map<String, dynamic> msg) {
-    _wsClient?.send(msg);
-  }
-
-  void leaveRoom() {
-    // 发送离开房间消息
-    if (!_isHostMode) {
-      // 通过 WebSocket 发送离开消息给房主
-      if (_wsClient != null && state.currentPlayerId != null) {
-        _wsClient!.send({
-          'type': 'player_leave',
-          'playerId': state.currentPlayerId,
-          'timestamp': DateTime.now().toIso8601String(),
-        });
-        _logger.i('发送离开房间消息给房主');
-      }
-      // 断开 WebSocket 连接
-      _wsClient?.disconnect();
-      _wsClient = null;
-    } else {
-      // 房主离开，销毁房间
-      _syncService?.stopBroadcasting();
-      _httpServer?.stop();
-      _webSocketManager?.closeAll();
-      _logger.i('房主离开，房间已销毁');
-    }
-
-    state = const LobbyState();
-  }
-
-  /// 踢出玩家
-  void kickPlayer(String playerId) {
-    if (!state.isHost || state.room == null) return;
-
-    final player = state.room!.players.firstWhere(
-      (p) => p.playerId == playerId,
-      orElse: () => throw Exception('Player not found'),
-    );
-
-    // 从房间移除玩家
-    final updatedPlayers = state.room!.players
-        .where((p) => p.playerId != playerId)
-        .toList();
-
-    state = state.copyWith(
-      room: state.room!.copyWith(players: updatedPlayers),
-    );
-
-    // 广播踢出消息
-    if (_syncService != null) {
-      _syncService!.broadcastPlayerLeft(playerId, player.playerName);
-    }
-
-    _logger.i('踢出玩家: $playerId');
-  }
-
-  /// 释放资源
-  @override
-  void dispose() {
-    _syncService?.dispose();
-    _httpServer?.stop();
-    _webSocketManager?.dispose();
-    super.dispose();
-  }
-}
+import 'game_navigation_helper.dart';
+import 'lobby_notifier.dart';
 
 /// 等待大厅页面
 class RoomLobbyPage extends ConsumerStatefulWidget {
@@ -349,10 +22,10 @@ class _RoomLobbyPageState extends ConsumerState<RoomLobbyPage> {
   Widget build(BuildContext context) {
     final state = ref.watch(lobbyProvider);
 
-    // 任务 6.1：当 isStarting 变为 true 时根据游戏类型导航
+    // 当 isStarting 变为 true 时根据游戏类型导航
     ref.listen<LobbyState>(lobbyProvider, (prev, next) {
       if (prev?.isStarting == false && next.isStarting == true) {
-        _navigateToGame(context, ref, next);
+        navigateToGame(context, ref, next);
       }
     });
 
@@ -396,7 +69,8 @@ class _RoomLobbyPageState extends ConsumerState<RoomLobbyPage> {
         gameConfig: {},
         createdAt: DateTime.now(),
       );
-      effectiveState = state.copyWith(room: effectiveRoom, currentPlayerId: 'player1');
+      effectiveState =
+          state.copyWith(room: effectiveRoom, currentPlayerId: 'player1');
     }
 
     return PopScope(
@@ -456,14 +130,16 @@ class _RoomLobbyPageState extends ConsumerState<RoomLobbyPage> {
           const Spacer(),
           if (room.status == RoomStatus.waiting)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: context.gameColors.statusSuccessBg,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 '等待中',
-                style: TextStyle(color: context.gameColors.primaryGreen, fontSize: 12),
+                style: TextStyle(
+                    color: context.gameColors.primaryGreen, fontSize: 12),
               ),
             ),
         ],
@@ -527,8 +203,10 @@ class _RoomLobbyPageState extends ConsumerState<RoomLobbyPage> {
             if (!state.isHost)
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => ref.read(lobbyProvider.notifier).toggleReady(),
-                  icon: Icon(isReady ? Icons.check_circle : Icons.circle_outlined),
+                  onPressed: () =>
+                      ref.read(lobbyProvider.notifier).toggleReady(),
+                  icon: Icon(
+                      isReady ? Icons.check_circle : Icons.circle_outlined),
                   label: Text(isReady ? '取消准备' : '准备'),
                 ),
               ),
@@ -551,7 +229,8 @@ class _RoomLobbyPageState extends ConsumerState<RoomLobbyPage> {
                       ? const SizedBox(
                           width: 16,
                           height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child:
+                              CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Text('开始游戏'),
                 ),
@@ -617,7 +296,8 @@ class _RoomLobbyPageState extends ConsumerState<RoomLobbyPage> {
             ListTile(
               leading: const Icon(Icons.people),
               title: const Text('人数'),
-              subtitle: Text('${room.currentPlayerCount}/${room.maxPlayerCount}'),
+              subtitle:
+                  Text('${room.currentPlayerCount}/${room.maxPlayerCount}'),
             ),
             if (room.password != null && room.password!.isNotEmpty)
               ListTile(
@@ -681,128 +361,6 @@ class _RoomLobbyPageState extends ConsumerState<RoomLobbyPage> {
       ),
     );
   }
-
-  /// 任务 6.1-6.3：根据游戏类型路由至对应游戏页面并初始化 NetworkAdapter
-  void _navigateToGame(BuildContext context, WidgetRef ref, LobbyState lobbyState) {
-    final room = lobbyState.room;
-    if (room == null) return;
-    final lobbyNotifier = ref.read(lobbyProvider.notifier);
-    final isHost = lobbyState.isHost;
-    // 任务 6.2：使用房间分配的玩家 ID 作为本地玩家 ID
-    final localPlayerId = lobbyState.currentPlayerId ?? 'player1';
-
-    final incomingStream = isHost
-        ? lobbyNotifier.hostGameStream
-        : lobbyNotifier.clientGameStream;
-
-    void broadcastFn(Map<String, dynamic> msg) {
-      if (isHost) {
-        lobbyNotifier.broadcastGameMessage(msg);
-      } else {
-        lobbyNotifier.sendGameMessage(msg);
-      }
-    }
-
-    switch (room.gameType) {
-      case GameType.texasHoldem:
-        // 任务 6.3：Host 初始化并启动 HoldemNetworkAdapter
-        final holdemNotifier = ref.read(holdemGameProvider.notifier);
-        final adapter = HoldemNetworkAdapter(
-          incomingStream: incomingStream,
-          broadcastFn: broadcastFn,
-          notifier: holdemNotifier,
-          isHost: isHost,
-          localPlayerId: localPlayerId,
-        );
-        adapter.start();
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => HoldemGamePage(isOnline: true, networkAdapter: adapter),
-        ));
-      case GameType.zhajinhua:
-        final zhjNotifier = ref.read(zhjGameProvider.notifier);
-        final adapter = ZhjNetworkAdapter(
-          incomingStream: incomingStream,
-          broadcastFn: broadcastFn,
-          notifier: zhjNotifier,
-          isHost: isHost,
-          localPlayerId: localPlayerId,
-        );
-        adapter.start();
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => ZhajinhuaPage(isOnline: true, networkAdapter: adapter),
-        ));
-      case GameType.blackjack:
-        final bjNotifier = ref.read(blackjackGameProvider.notifier);
-        final adapter = BlackjackNetworkAdapter(
-          incomingStream: incomingStream,
-          broadcastFn: broadcastFn,
-          notifier: bjNotifier,
-          isHost: isHost,
-          localPlayerId: localPlayerId,
-        );
-        adapter.start();
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => BlackjackPage(isOnline: true, networkAdapter: adapter),
-        ));
-      case GameType.niuniu:
-        final nnNotifier = ref.read(niuniuGameProvider.notifier);
-        final adapter = NiuniuNetworkAdapter(
-          incomingStream: incomingStream,
-          broadcastFn: broadcastFn,
-          notifier: nnNotifier,
-          isHost: isHost,
-          localPlayerId: localPlayerId,
-        );
-        adapter.start();
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => NiuniuPage(isOnline: true, networkAdapter: adapter),
-        ));
-      case GameType.doudizhu:
-        context.push('/doudizhu');
-      case GameType.shengji:
-        final shengjiNotifier = ref.read(shengjiNotifierProvider.notifier);
-        final adapter = ShengjiNetworkAdapter(
-          incomingStream: incomingStream,
-          broadcastFn: broadcastFn,
-          notifier: shengjiNotifier,
-          isHost: isHost,
-          localPlayerId: localPlayerId,
-        );
-        adapter.start();
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => ShengjiPage(isOnline: true, networkAdapter: adapter),
-        ));
-      case GameType.paodekai:
-        final pdkNotifier = ref.read(pdkGameProvider.notifier);
-        final adapter = PdkNetworkAdapter(
-          incomingStream: incomingStream,
-          broadcastFn: broadcastFn,
-          notifier: pdkNotifier,
-          isHost: isHost,
-          localPlayerId: localPlayerId,
-        );
-        adapter.start();
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => PaodekaiPage(isOnline: true, networkAdapter: adapter),
-        ));
-      case GameType.guandan:
-        final guandanNotifier = ref.read(guandanGameProvider.notifier);
-        final guandanAdapter = GuandanNetworkAdapter(
-          incomingStream: incomingStream,
-          broadcastFn: broadcastFn,
-          notifier: guandanNotifier,
-          isHost: isHost,
-          localPlayerId: localPlayerId,
-        );
-        guandanAdapter.start();
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => GuandanGamePage(
-            isOnline: true,
-            networkAdapter: guandanAdapter,
-          ),
-        ));
-    }
-  }
 }
 
 /// 玩家座位卡片
@@ -839,7 +397,9 @@ class _PlayerSeatCard extends StatelessWidget {
     }
 
     return Card(
-      color: isCurrentPlayer ? Theme.of(context).colorScheme.primaryContainer : null,
+      color: isCurrentPlayer
+          ? Theme.of(context).colorScheme.primaryContainer
+          : null,
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: player!.isHost
@@ -855,14 +415,16 @@ class _PlayerSeatCard extends StatelessWidget {
             if (player!.isHost) ...[
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: context.gameColors.accentAmberBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   '房主',
-                  style: TextStyle(fontSize: 10, color: context.gameColors.accentAmber),
+                  style: TextStyle(
+                      fontSize: 10, color: context.gameColors.accentAmber),
                 ),
               ),
             ],
@@ -873,7 +435,8 @@ class _PlayerSeatCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (player!.status == PlayerStatus.ready)
-              Icon(Icons.check_circle, color: context.gameColors.primaryGreen),
+              Icon(Icons.check_circle,
+                  color: context.gameColors.primaryGreen),
             if (isHost && onKick != null && !isCurrentPlayer)
               IconButton(
                 icon: const Icon(Icons.person_remove_outlined),

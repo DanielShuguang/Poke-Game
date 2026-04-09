@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:poke_game/domain/lan/entities/player_identity.dart';
 import 'package:poke_game/domain/lan/entities/room.dart';
 import 'package:poke_game/domain/lan/entities/room_info.dart';
-import 'package:poke_game/presentation/pages/room/room_lobby_page.dart';
+import 'package:poke_game/presentation/pages/room/lobby_notifier.dart';
 import 'package:poke_game/presentation/pages/settings/settings_provider.dart';
 import 'package:uuid/uuid.dart';
 
