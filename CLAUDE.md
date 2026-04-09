@@ -2,7 +2,7 @@
 
 ## 项目概述
 
-Flutter 跨平台扑克游戏合集，已上线 6 款游戏（斗地主、德州扑克、炸金花、21点、斗牛、升级），全部支持单机 AI 对战与局域网联机对战，支持 Android/iOS/Web/Windows/macOS/Linux。
+Flutter 跨平台扑克游戏合集，已上线 8 款游戏（斗地主、德州扑克、炸金花、21点、斗牛、升级、跑得快、掼蛋），全部支持单机 AI 对战与局域网联机对战，支持 Android/iOS/Web/Windows/macOS/Linux。
 
 ## 技术栈
 
@@ -14,7 +14,8 @@ Flutter 3.6.1+ | flutter_riverpod | freezed_annotation | Hive + SharedPreference
 lib/
 ├── core/
 │   ├── router/                    # GoRouter 路由配置
-│   └── network/                   # 各游戏网络适配器
+│   ├── network/                   # 各游戏网络适配器
+│   └── ai/mcts/                   # 通用 MCTS 引擎（mcts_engine/mcts_node/mcts_game_state）
 ├── domain/
 │   ├── game/entities/             # GameInfo、GameTypeConfig
 │   ├── lan/entities/              # Room、RoomInfo、GameType 枚举
@@ -23,16 +24,20 @@ lib/
 │   ├── zhajinhua/                 # 炸金花
 │   ├── blackjack/                 # 21点
 │   ├── niuniu/                    # 斗牛
-│   └── shengji/                   # 升级
+│   ├── shengji/                   # 升级
+│   ├── paodekai/                  # 跑得快
+│   └── guandan/                   # 掼蛋
 └── presentation/pages/
     ├── home/                      # 首页（游戏列表 + 局域网入口）
-    ├── room/                      # 局域网（scan/create/lobby）
+    ├── room/                      # 局域网（scan/create/lobby/game_navigation_helper）
     ├── doudizhu/                  # 斗地主页面
     ├── texas_holdem/              # 德州扑克页面
     ├── zhajinhua/                 # 炸金花页面
     ├── blackjack/                 # 21点页面
     ├── niuniu/                    # 斗牛页面
     ├── shengji/                   # 升级页面
+    ├── paodekai/                  # 跑得快页面
+    ├── guandan/                   # 掼蛋页面
     └── settings/                  # 设置页面
 ```
 
@@ -46,21 +51,28 @@ lib/core/network/
 ├── zhj_network_adapter.dart
 ├── blackjack_network_adapter.dart
 ├── niuniu_network_adapter.dart
-└── shengji_network_adapter.dart
+├── shengji_network_adapter.dart
+├── pdk_network_adapter.dart
+└── guandan_network_adapter.dart
 ```
 
-适配器构造参数：`incomingStream`、`broadcastFn`、`notifier`、`isHost`、`localPlayerId`
+适配器构造参数：`incomingStream`、`broadcastFn`、`notifier`、`isHost`、`localPlayerId`、`turnTimeLimit`
 
 - **Host**：接收行动消息 → 调用 notifier → 广播新状态
 - **Client**：发送行动消息 → 等待状态同步
 - 手牌隐私：`toJson(includeAllCards: false)` 在 showdown 前隐藏他人手牌
-- 超时托管：Host 用 35s `Timer` 监听当前玩家，超时代为执行最小操作
+- 超时托管：Host 用可配置 `Timer`（默认 35s，由 `turnTimeLimit` 参数控制）监听当前玩家，超时代为执行最小操作
+- 创建房间时可选择回合时限（15/25/35/60 秒），通过 `Room.gameConfig['turnTimeLimit']` 传递
 
-**LobbyNotifier 暴露的网络接口**：
+**LobbyNotifier 暴露的网络接口**（位于 `lobby_notifier.dart`）：
 - `hostGameStream` → WebSocketManager.dataStream（Host 收消息）
 - `clientGameStream` → WebSocketClient.messageStream（Client 收消息）
 - `broadcastGameMessage(msg)` → Host 广播
 - `sendGameMessage(msg)` → Client 发送
+
+**游戏导航**（位于 `game_navigation_helper.dart`）：
+- `navigateToGame()` 根据 GameType 初始化对应 NetworkAdapter 并跳转游戏页面
+- 从 `room.gameConfig['turnTimeLimit']` 读取时限并传递给适配器和页面
 
 ## 新增游戏接入清单
 
@@ -71,7 +83,7 @@ lib/core/network/
 3. `core/router/app_router.dart` — 注册路由
 4. `presentation/pages/home/home_provider.dart` — 游戏卡片数据
 5. `presentation/pages/home/home_page.dart` — `_supportsOnline` 列表
-6. `presentation/pages/room/room_lobby_page.dart` — `_navigateToGame()` switch 分支
+6. `presentation/pages/room/game_navigation_helper.dart` — `navigateToGame()` switch 分支
 7. `presentation/pages/room/game_rules_page.dart` — `_getRulesContent()` switch 分支
 
 ## UI 规范

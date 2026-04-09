@@ -12,22 +12,26 @@
 | 21点 | ✅ | ✅ |
 | 斗牛 | ✅ | ✅ |
 | 升级 | ✅ | ✅ |
+| 跑得快 | ✅ | ✅ |
+| 掼蛋 | ✅ | ✅ |
 
 ## 功能特性
 
 ### 单机游戏
-- 斗地主：完整游戏流程，智能 AI（叫地主 + 出牌策略），支持所有牌型
+- 斗地主：完整游戏流程，智能 AI（MCTS + 叫地主/出牌策略），支持所有牌型
 - 德州扑克：现金局，支持 Hit/Stand/Double/Split/Surrender 等操作
 - 炸金花：三张牌博弈，AI 跟注/加注/弃牌决策
 - 21点：经典规则，Hard 17 庄家策略，Blackjack 1.5 倍赔率
 - 斗牛：C(5,3) 枚举判牛，五小牛/炸弹/牛牛特殊牌型，倍率结算
 - 升级：4 人两队组队斗牌，支持亮主/叫主，AI 策略出牌
+- 跑得快：3 人竞速出牌，智能 AI 出牌提示，倒计时超时自动托管
+- 掼蛋：4 人两队对抗（两副牌），MCTS AI，进贡/还贡机制，倒计时超时自动托管
 
 ### 局域网联机
 - 基于 Wi-Fi 的局域网房间发现与创建
 - Host/Client 适配器模式，Host 执行逻辑并广播状态
 - 手牌隐私保护（showdown 前隐藏他人手牌）
-- 35 秒超时自动托管（代为执行最小操作）
+- 可配置回合时限（15/25/35/60 秒），超时自动托管
 - 支持观战模式
 
 ### 平台支持
@@ -59,7 +63,8 @@ flutter run
 lib/
 ├── core/
 │   ├── router/                    # GoRouter 路由配置
-│   └── network/                   # 各游戏网络适配器（Host/Client 模式）
+│   ├── network/                   # 各游戏网络适配器（Host/Client 模式）
+│   └── ai/mcts/                   # 通用 MCTS 引擎
 ├── domain/
 │   ├── game/                      # 通用游戏实体（GameInfo、GameType）
 │   ├── lan/                       # 局域网房间实体（Room、RoomInfo）
@@ -68,7 +73,9 @@ lib/
 │   ├── zhajinhua/                 # 炸金花领域
 │   ├── blackjack/                 # 21点领域
 │   ├── niuniu/                    # 斗牛领域
-│   └── shengji/                   # 升级领域
+│   ├── shengji/                   # 升级领域
+│   ├── paodekai/                  # 跑得快领域
+│   └── guandan/                   # 掼蛋领域
 └── presentation/
     └── pages/
         ├── home/                  # 首页（游戏列表）
@@ -79,6 +86,8 @@ lib/
         ├── blackjack/             # 21点游戏页面
         ├── niuniu/                # 斗牛游戏页面
         ├── shengji/               # 升级游戏页面
+        ├── paodekai/              # 跑得快游戏页面
+        ├── guandan/               # 掼蛋游戏页面
         └── settings/              # 设置页面
 ```
 
