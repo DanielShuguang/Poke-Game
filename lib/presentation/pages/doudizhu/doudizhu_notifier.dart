@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:poke_game/core/ai/mcts/pimc_engine.dart';
 import 'package:poke_game/domain/doudizhu/ai/ai_player.dart';
+import 'package:poke_game/domain/doudizhu/ai/doudizhu_mcts_state.dart';
 import 'package:poke_game/domain/doudizhu/entities/card.dart';
 import 'package:poke_game/domain/doudizhu/entities/game_config.dart';
 import 'package:poke_game/domain/doudizhu/entities/game_state.dart';
@@ -791,22 +793,51 @@ class DoudizhuNotifier extends StateNotifier<DoudizhuUiState> {
         break;
       }
 
-      final decision = await currentPlayer.decidePlay(
-        state.gameState.lastPlayedCards,
-        state.gameState.lastPlayerIndex,
-      );
+      bool shouldPlay = false;
+      List<Card>? cardsToPlay;
+
+      if (_config.difficulty == AiDifficulty.hard) {
+        // 困难：使用 PIMC-MCTS 引擎
+        final gameState = state.gameState;
+        final mctsState = DoudizhuMctsState.fromPlayers(
+          playerIds: gameState.players.map((p) => p.id).toList(),
+          playerCards: gameState.players.map((p) => p.handCards).toList(),
+          playerRoles: gameState.players.map((p) => p.role).toList(),
+          currentPlayerIndex: gameState.currentPlayerIndex,
+          landlordIndex: gameState.landlordIndex ?? 0,
+          lastPlayedCards: gameState.lastPlayedCards,
+          lastPlayerIndex: gameState.lastPlayerIndex,
+        );
+        if (!mctsState.isTerminal) {
+          final action = await runPimcSearch(
+            PimcSearchParams(
+              state: mctsState,
+              currentPlayerId: currentPlayer.id,
+            ),
+          );
+          shouldPlay = !action.isPass;
+          cardsToPlay = action.isPass ? null : action.cards;
+        }
+      } else {
+        // 简单/普通：使用规则 AI
+        final decision = await currentPlayer.decidePlay(
+          state.gameState.lastPlayedCards,
+          state.gameState.lastPlayerIndex,
+        );
+        shouldPlay = decision.shouldPlay;
+        cardsToPlay = decision.cards;
+      }
 
       try {
         var gameState = state.gameState;
-        if (decision.shouldPlay && decision.cards != null) {
-          gameState = _playCardsUseCase(gameState, currentPlayer.id, decision.cards!);
+        if (shouldPlay && cardsToPlay != null) {
+          gameState = _playCardsUseCase(gameState, currentPlayer.id, cardsToPlay);
         } else {
           gameState = _playCardsUseCase.pass(gameState, currentPlayer.id);
         }
 
         state = state.copyWith(gameState: gameState);
 
-        // 检查胜负
         final winners = _checkWinnerUseCase(gameState);
         if (winners != null) {
           state = state.copyWith(
@@ -816,15 +847,12 @@ class DoudizhuNotifier extends StateNotifier<DoudizhuUiState> {
           return;
         }
 
-        // 检查下一个玩家是否是人类
         final nextPlayer = gameState.players[gameState.currentPlayerIndex];
         if (nextPlayer is! AiPlayer) {
-          // 轮到人类，递增 turnKey 驱动倒计时重置
           state = state.copyWith(turnKey: state.turnKey + 1);
           break;
         }
       } catch (e) {
-        // AI出牌失败，跳过
         break;
       }
     }

@@ -1,3 +1,6 @@
+/// AI 难度
+enum AiDifficulty { easy, normal, hard }
+
 /// 游戏模式
 enum GameMode {
   /// 单机人机对战
@@ -26,6 +29,9 @@ class GameConfig {
   /// - 非人机模式：所有玩家都可以选择"不叫"，全部不叫时重新发牌
   final bool isHumanVsAi;
 
+  /// AI 难度档位（默认普通）
+  final AiDifficulty difficulty;
+
   /// 游戏模式
   final GameMode gameMode;
 
@@ -41,6 +47,7 @@ class GameConfig {
     this.initialCardCount = 17,
     this.aiThinkDelayMs = 1500,
     this.isHumanVsAi = true,
+    this.difficulty = AiDifficulty.normal,
     this.gameMode = GameMode.singlePlayer,
     this.roomId,
     this.currentPlayerId,
@@ -75,6 +82,7 @@ class GameConfig {
     int? initialCardCount,
     int? aiThinkDelayMs,
     bool? isHumanVsAi,
+    AiDifficulty? difficulty,
     GameMode? gameMode,
     String? roomId,
     String? currentPlayerId,
@@ -85,6 +93,7 @@ class GameConfig {
       initialCardCount: initialCardCount ?? this.initialCardCount,
       aiThinkDelayMs: aiThinkDelayMs ?? this.aiThinkDelayMs,
       isHumanVsAi: isHumanVsAi ?? this.isHumanVsAi,
+      difficulty: difficulty ?? this.difficulty,
       gameMode: gameMode ?? this.gameMode,
       roomId: roomId ?? this.roomId,
       currentPlayerId: currentPlayerId ?? this.currentPlayerId,

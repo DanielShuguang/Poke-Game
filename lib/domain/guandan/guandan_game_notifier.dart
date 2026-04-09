@@ -3,19 +3,25 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'ai/guandan_ai_strategy.dart';
+import 'ai/guandan_mcts_state.dart';
 import 'entities/guandan_card.dart';
 import 'entities/guandan_game_state.dart';
 import 'entities/guandan_player.dart';
 import 'usecases/deal_cards_usecase.dart';
 import 'usecases/round_result_usecase.dart';
 import 'usecases/validate_hand_usecase.dart';
+import 'package:poke_game/core/ai/mcts/pimc_engine.dart';
+import 'package:poke_game/domain/doudizhu/entities/game_config.dart'
+    show AiDifficulty;
 
 /// 掼蛋游戏状态管理（StateNotifier）
 class GuandanGameNotifier extends StateNotifier<GuandanGameState> {
   final GuandanAiStrategy _ai;
+  final AiDifficulty _difficulty;
 
-  GuandanGameNotifier({GuandanAiStrategy? ai})
+  GuandanGameNotifier({GuandanAiStrategy? ai, AiDifficulty difficulty = AiDifficulty.normal})
       : _ai = ai ?? const GuandanAiStrategy(),
+        _difficulty = difficulty,
         super(GuandanGameState.initial());
 
   GuandanGameState get currentState => state;
@@ -323,7 +329,12 @@ class GuandanGameNotifier extends StateNotifier<GuandanGameState> {
     }
   }
 
-  void _executeAiAction(String playerId) {
+  Future<void> _executeAiAction(String playerId) async {
+    if (_difficulty == AiDifficulty.hard &&
+        state.phase == GuandanPhase.playing) {
+      await _executeHardAiAction(playerId);
+      return;
+    }
     final action = _ai.decideAction(state, playerId);
     switch (action) {
       case PlayCardsAction(:final cards):
@@ -350,6 +361,40 @@ class GuandanGameNotifier extends StateNotifier<GuandanGameState> {
         tribute(playerId, card);
       case ReturnTributeAction(:final card):
         returnTribute(playerId, card);
+    }
+  }
+
+  Future<void> _executeHardAiAction(String playerId) async {
+    final gs = state;
+    final mctsState = GuandanMctsState.fromData(
+      playerIds: gs.players.map((p) => p.id).toList(),
+      teamIds: gs.players.map((p) => p.teamId).toList(),
+      playerCards:
+          gs.players.map((p) => List<GuandanCard>.from(p.cards)).toList(),
+      currentPlayerIndex: gs.currentPlayerIndex,
+      team0Level: gs.team0Level,
+      team1Level: gs.team1Level,
+      lastPlayedHand: gs.lastPlayedHand,
+      lastPlayerIndex: gs.lastPlayerIndex,
+    );
+    final params = PimcSearchParams<GuandanMctsState, GuandanMctsAction>(
+      state: mctsState,
+      currentPlayerId: playerId,
+      samples: 20,
+      timeLimit: const Duration(milliseconds: 150),
+    );
+    final mctsAction = await runPimcSearch(params);
+    if (!mounted) return;
+
+    if (mctsAction.isPass) {
+      pass(playerId);
+    } else {
+      final prevIndex = state.currentPlayerIndex;
+      playCards(playerId, mctsAction.cards);
+      if (state.currentPlayerIndex == prevIndex &&
+          state.phase == GuandanPhase.playing) {
+        pass(playerId);
+      }
     }
   }
 
