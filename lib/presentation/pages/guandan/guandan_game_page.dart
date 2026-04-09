@@ -463,6 +463,9 @@ class _GuandanGamePageState extends ConsumerState<GuandanGamePage> {
   }
 
   Widget _buildLocalHand(GuandanPlayer player) {
+    final gameState = ref.read(guandanGameProvider);
+    final level = gameState.levelForTeam(player.teamId);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: GuandanHandWidget(
@@ -477,6 +480,19 @@ class _GuandanGamePageState extends ConsumerState<GuandanGamePage> {
             } else {
               _selectedIndices.add(i);
             }
+          });
+        },
+        calculatePreview: (draggedIndices) {
+          final draggedCards =
+              draggedIndices.map((i) => player.cards[i]).toList();
+          final hand = ValidateHandUsecase.validate(draggedCards, level);
+          return hand != null ? draggedIndices.toSet() : {};
+        },
+        onDragEnd: (indices) {
+          setState(() {
+            _selectedIndices
+              ..clear()
+              ..addAll(indices);
           });
         },
       ),
