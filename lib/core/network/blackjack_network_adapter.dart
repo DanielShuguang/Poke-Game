@@ -1,81 +1,59 @@
-import 'dart:async';
-
+import 'package:poke_game/core/network/game_network_adapter.dart';
 import 'package:poke_game/domain/blackjack/entities/blackjack_game_state.dart';
 import 'package:poke_game/domain/blackjack/entities/blackjack_network_action.dart';
 import 'package:poke_game/presentation/pages/blackjack/providers/blackjack_game_notifier.dart';
-
-abstract class _BjMessageType {
-  static const action = 'blackjack_action';
-  static const stateSync = 'blackjack_state';
-}
 
 /// 21点网络适配器
 ///
 /// Host：接收 Client 行动 → 验证 → 执行 → 广播新状态。
 /// Client：发送行动给 Host，接收状态广播更新本地 UI。
-class BlackjackNetworkAdapter {
-  final Stream<Map<String, dynamic>> incomingStream;
-  final void Function(Map<String, dynamic>) broadcastFn;
+class BlackjackNetworkAdapter extends GameNetworkAdapter {
   final BlackjackGameNotifier _notifier;
-  final bool isHost;
-  final String localPlayerId;
-
-  StreamSubscription? _sub;
-  Timer? _timeoutTimer;
-  String? _watchedPlayerId;
-
-  final int turnTimeLimit;
 
   BlackjackNetworkAdapter({
-    required this.incomingStream,
-    required this.broadcastFn,
+    required super.incomingStream,
+    required super.broadcastFn,
     required BlackjackGameNotifier notifier,
-    required this.isHost,
-    required this.localPlayerId,
-    this.turnTimeLimit = 35,
+    required super.isHost,
+    required super.localPlayerId,
+    super.turnTimeLimit = 35,
   }) : _notifier = notifier;
 
-  void start() {
-    _sub = incomingStream.listen(_handleMessage);
-    if (isHost) _resetTimeout();
+  @override
+  dynamic get notifier => _notifier;
+
+  @override
+  String get actionMessageType => 'blackjack_action';
+
+  @override
+  String get stateMessageType => 'blackjack_state';
+
+  @override
+  dynamic get currentState => _notifier.currentState;
+
+  @override
+  Map<String, dynamic> serializeState(dynamic state,
+      {bool includeAllCards = false}) {
+    return (state as BlackjackGameState).toJson(includeAllCards: includeAllCards);
   }
 
-  void stop() {
-    _sub?.cancel();
-    _sub = null;
-    _timeoutTimer?.cancel();
-    _timeoutTimer = null;
+  @override
+  dynamic deserializeAction(Map<String, dynamic> data) {
+    return BlackjackNetworkAction.fromJson(data);
   }
 
-  /// Client 发送行动
-  void sendAction(BlackjackNetworkAction action) {
-    broadcastFn({'type': _BjMessageType.action, 'data': action.toJson()});
+  @override
+  bool shouldProcessAction(dynamic action, dynamic state) {
+    final networkAction = action as BlackjackNetworkAction;
+    final s = state as BlackjackGameState;
+    final currentPlayer = s.currentPlayer;
+    if (currentPlayer == null) return false;
+    return currentPlayer.id == networkAction.playerId;
   }
 
-  void _handleMessage(Map<String, dynamic> msg) {
-    try {
-      final type = msg['type'] as String?;
-      final data = msg['data'] as Map<String, dynamic>?;
-      if (data == null) return;
-      if (type == _BjMessageType.action && isHost) {
-        _handleActionFromClient(data);
-      } else if (type == _BjMessageType.stateSync && !isHost) {
-        _handleStateSyncFromHost(data);
-      }
-    } catch (_) {}
-  }
-
-  // ── Host 端 ───────────────────────────────────────────────────────────────
-
-  void _handleActionFromClient(Map<String, dynamic> data) {
-    final networkAction = BlackjackNetworkAction.fromJson(data);
-
-    // 验证是否轮到该玩家
-    final currentPlayer = _notifier.currentState.currentPlayer;
-    if (currentPlayer == null || currentPlayer.id != networkAction.playerId) {
-      return;
-    }
-
+  @override
+  void executeAction(dynamic action) {
+    final networkAction = action as BlackjackNetworkAction;
     switch (networkAction.action) {
       case BlackjackActionType.hit:
         _notifier.networkHit(networkAction.playerId);
@@ -88,40 +66,36 @@ class BlackjackNetworkAdapter {
       case BlackjackActionType.surrender:
         _notifier.networkSurrender(networkAction.playerId);
     }
-
-    _broadcastState();
-    _resetTimeout();
   }
 
-  void _handleStateSyncFromHost(Map<String, dynamic> data) {
-    final newState = BlackjackGameState.fromJson(
-      data,
-      localPlayerId: localPlayerId,
-    );
+  @override
+  void applyNetworkState(Map<String, dynamic> data) {
+    final newState = BlackjackGameState.fromJson(data, localPlayerId: localPlayerId);
     _notifier.applyNetworkState(newState);
   }
 
-  void _broadcastState({bool includeAllCards = false}) {
-    final json = _notifier.currentState.toJson(includeAllCards: includeAllCards);
-    broadcastFn({'type': _BjMessageType.stateSync, 'data': json});
+  @override
+  bool includeAllCardsInState(dynamic state) => false;
+
+  @override
+  bool shouldTrackTimeout(dynamic state) {
+    final s = state as BlackjackGameState;
+    return s.currentPlayer != null;
   }
 
-  /// 重置超时计时器（35s 内未操作则代为 Stand）
-  void _resetTimeout() {
-    _timeoutTimer?.cancel();
-    final current = _notifier.currentState.currentPlayer;
-    if (current == null) return;
-    _watchedPlayerId = current.id;
+  @override
+  String? currentNonAiPlayerId(dynamic state) {
+    final s = state as BlackjackGameState;
+    return s.currentPlayer?.id;
+  }
 
-    _timeoutTimer = Timer(Duration(seconds: turnTimeLimit), () {
-      final watched = _watchedPlayerId;
-      if (watched == null) return;
-      final activePlayer = _notifier.currentState.currentPlayer;
-      if (activePlayer?.id == watched) {
-        _notifier.forcePlayerStand(watched);
-        _broadcastState();
-        _resetTimeout();
-      }
-    });
+  @override
+  void onTimeout(String playerId) {
+    _notifier.forcePlayerStand(playerId);
+  }
+
+  /// Client 发送行动
+  void sendAction(BlackjackNetworkAction action) {
+    broadcastFn({'type': actionMessageType, 'data': action.toJson()});
   }
 }

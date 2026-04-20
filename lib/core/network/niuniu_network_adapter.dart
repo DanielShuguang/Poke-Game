@@ -1,138 +1,111 @@
-import 'dart:async';
-
+import 'package:poke_game/core/network/game_network_adapter.dart';
 import 'package:poke_game/domain/niuniu/entities/niuniu_game_state.dart';
 import 'package:poke_game/domain/niuniu/entities/niuniu_network_action.dart';
 import 'package:poke_game/domain/niuniu/entities/niuniu_player.dart';
 import 'package:poke_game/presentation/pages/niuniu/providers/niuniu_game_notifier.dart';
 
-abstract class _NiuniuMessageType {
-  static const action = 'niuniu_action';
-  static const stateSync = 'niuniu_state';
-}
-
 /// 斗牛网络适配器
 ///
 /// Host：接收 Client 下注行动 → 验证 → 执行 → 广播新状态。
 /// Client：发送行动给 Host，接收状态广播更新本地 UI。
-class NiuniuNetworkAdapter {
-  final Stream<Map<String, dynamic>> incomingStream;
-  final void Function(Map<String, dynamic>) broadcastFn;
+class NiuniuNetworkAdapter extends GameNetworkAdapter {
   final NiuniuGameNotifier _notifier;
-  final bool isHost;
-  final String localPlayerId;
-
-  StreamSubscription? _sub;
-  Timer? _timeoutTimer;
-  String? _watchedPlayerId;
-
-  final int turnTimeLimit;
 
   NiuniuNetworkAdapter({
-    required this.incomingStream,
-    required this.broadcastFn,
+    required super.incomingStream,
+    required super.broadcastFn,
     required NiuniuGameNotifier notifier,
-    required this.isHost,
-    required this.localPlayerId,
-    this.turnTimeLimit = 35,
+    required super.isHost,
+    required super.localPlayerId,
+    super.turnTimeLimit = 35,
   }) : _notifier = notifier;
 
-  void start() {
-    _sub = incomingStream.listen(_handleMessage);
-    if (isHost) _resetTimeout();
+  @override
+  dynamic get notifier => _notifier;
+
+  @override
+  String get actionMessageType => 'niuniu_action';
+
+  @override
+  String get stateMessageType => 'niuniu_state';
+
+  @override
+  dynamic get currentState => _notifier.currentState;
+
+  @override
+  Map<String, dynamic> serializeState(dynamic state,
+      {bool includeAllCards = false}) {
+    final s = state as NiuniuGameState;
+    return s.toJson(includeAllCards: includeAllCards);
   }
 
-  void stop() {
-    _sub?.cancel();
-    _sub = null;
-    _timeoutTimer?.cancel();
-    _timeoutTimer = null;
+  @override
+  dynamic deserializeAction(Map<String, dynamic> data) {
+    return NiuniuNetworkAction.fromJson(data);
+  }
+
+  @override
+  bool shouldProcessAction(dynamic action, dynamic state) {
+    final networkAction = action as NiuniuNetworkAction;
+    final s = state as NiuniuGameState;
+    final player = s.players.where((p) => p.id == networkAction.playerId).firstOrNull;
+    if (player == null) return false;
+    return player.status == NiuniuPlayerStatus.waiting;
+  }
+
+  @override
+  void executeAction(dynamic action) {
+    final networkAction = action as NiuniuNetworkAction;
+    if (networkAction.action == NiuniuActionType.bet) {
+      _notifier.networkBet(networkAction.playerId, networkAction.amount);
+    }
+  }
+
+  @override
+  void applyNetworkState(Map<String, dynamic> data) {
+    final newState = NiuniuGameState.fromJson(data, localPlayerId: localPlayerId);
+    _notifier.applyNetworkState(newState);
+  }
+
+  @override
+  bool includeAllCardsInState(dynamic state) {
+    final s = state as NiuniuGameState;
+    return s.phase == NiuniuPhase.showdown || s.phase == NiuniuPhase.settlement;
+  }
+
+  @override
+  bool shouldTrackTimeout(dynamic state) {
+    final s = state as NiuniuGameState;
+    return s.phase == NiuniuPhase.betting;
+  }
+
+  @override
+  String? currentNonAiPlayerId(dynamic state) {
+    final s = state as NiuniuGameState;
+    final nextWaiting = s.punters
+        .where((p) => p.status == NiuniuPlayerStatus.waiting)
+        .firstOrNull;
+    return nextWaiting?.id;
+  }
+
+  @override
+  void onTimeout(String playerId) {
+    final player = _notifier.currentState.players
+        .where((p) => p.id == playerId)
+        .firstOrNull;
+    if (player != null && player.status == NiuniuPlayerStatus.waiting) {
+      _notifier.forceMinBet(playerId);
+    }
   }
 
   /// Client 发送行动
   void sendAction(NiuniuNetworkAction action) {
-    broadcastFn({'type': _NiuniuMessageType.action, 'data': action.toJson()});
+    broadcastFn({'type': actionMessageType, 'data': action.toJson()});
   }
 
-  /// Host 主动广播当前状态（如庄家点击"开始发牌"后调用）
+  /// Host 主动广播当前状态
+  @override
   void broadcastCurrentState() {
-    _broadcastState();
-  }
-
-  void _handleMessage(Map<String, dynamic> msg) {
-    try {
-      final type = msg['type'] as String?;
-      final data = msg['data'] as Map<String, dynamic>?;
-      if (data == null) return;
-      if (type == _NiuniuMessageType.action && isHost) {
-        _handleActionFromClient(data);
-      } else if (type == _NiuniuMessageType.stateSync && !isHost) {
-        _handleStateSyncFromHost(data);
-      }
-    } catch (_) {}
-  }
-
-  // ── Host 端 ───────────────────────────────────────────────────────────────
-
-  void _handleActionFromClient(Map<String, dynamic> data) {
-    final networkAction = NiuniuNetworkAction.fromJson(data);
-
-    // 验证：只处理等待下注的玩家行动
-    final player = _notifier.currentState.players
-        .where((p) => p.id == networkAction.playerId)
-        .firstOrNull;
-    if (player == null ||
-        player.status != NiuniuPlayerStatus.waiting) {
-      return;
-    }
-
-    switch (networkAction.action) {
-      case NiuniuActionType.bet:
-        _notifier.networkBet(networkAction.playerId, networkAction.amount);
-    }
-
-    _broadcastState();
-    _resetTimeout();
-  }
-
-  void _handleStateSyncFromHost(Map<String, dynamic> data) {
-    final newState = NiuniuGameState.fromJson(
-      data,
-      localPlayerId: localPlayerId,
-    );
-    _notifier.applyNetworkState(newState);
-  }
-
-  /// 广播状态：showdown/settlement 阶段包含全部手牌
-  void _broadcastState() {
-    final phase = _notifier.currentState.phase;
-    final includeAll =
-        phase == NiuniuPhase.showdown || phase == NiuniuPhase.settlement;
-    final json =
-        _notifier.currentState.toJson(includeAllCards: includeAll);
-    broadcastFn({'type': _NiuniuMessageType.stateSync, 'data': json});
-  }
-
-  /// 重置 35s 超时计时器（等待闲家下注期间）
-  void _resetTimeout() {
-    _timeoutTimer?.cancel();
-    if (_notifier.currentState.phase != NiuniuPhase.betting) return;
-    final nextWaiting = _notifier.currentState.punters
-        .where((p) => p.status == NiuniuPlayerStatus.waiting)
-        .firstOrNull;
-    if (nextWaiting == null) return;
-    _watchedPlayerId = nextWaiting.id;
-
-    _timeoutTimer = Timer(Duration(seconds: turnTimeLimit), () {
-      final watched = _watchedPlayerId;
-      if (watched == null) return;
-      final player = _notifier.currentState.players
-          .where((p) => p.id == watched)
-          .firstOrNull;
-      if (player != null && player.status == NiuniuPlayerStatus.waiting) {
-        _notifier.forceMinBet(watched);
-        _broadcastState();
-        _resetTimeout();
-      }
-    });
+    doBroadcastState();
   }
 }
