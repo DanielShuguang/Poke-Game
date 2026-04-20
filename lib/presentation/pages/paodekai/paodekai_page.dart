@@ -8,7 +8,7 @@ import 'package:poke_game/domain/paodekai/ai/pdk_ai_strategy.dart';
 import 'package:poke_game/domain/paodekai/entities/pdk_game_state.dart';
 import 'package:poke_game/domain/paodekai/entities/pdk_network_action.dart';
 import 'package:poke_game/domain/paodekai/entities/pdk_player.dart';
-import 'package:poke_game/domain/paodekai/notifiers/pdk_notifier.dart';
+import 'package:poke_game/presentation/pages/paodekai/providers/pdk_notifier.dart';
 import 'package:poke_game/domain/paodekai/usecases/hint_usecase.dart';
 import 'package:poke_game/domain/paodekai/usecases/validate_play_usecase.dart';
 import 'package:poke_game/presentation/pages/paodekai/widgets/card_hand.dart';
