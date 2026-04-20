@@ -1,18 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'ai/guandan_ai_strategy.dart';
-import 'ai/guandan_mcts_state.dart';
-import 'entities/guandan_card.dart';
-import 'entities/guandan_game_state.dart';
-import 'entities/guandan_player.dart';
-import 'usecases/deal_cards_usecase.dart';
-import 'usecases/round_result_usecase.dart';
-import 'usecases/validate_hand_usecase.dart';
 import 'package:poke_game/core/ai/mcts/pimc_engine.dart';
 import 'package:poke_game/domain/doudizhu/entities/game_config.dart'
     show AiDifficulty;
+import 'package:poke_game/domain/guandan/ai/guandan_ai_strategy.dart';
+import 'package:poke_game/domain/guandan/ai/guandan_mcts_state.dart';
+import 'package:poke_game/domain/guandan/entities/guandan_card.dart';
+import 'package:poke_game/domain/guandan/entities/guandan_game_state.dart';
+import 'package:poke_game/domain/guandan/entities/guandan_player.dart';
+import 'package:poke_game/domain/guandan/usecases/deal_cards_usecase.dart';
+import 'package:poke_game/domain/guandan/usecases/round_result_usecase.dart';
+import 'package:poke_game/domain/guandan/usecases/validate_hand_usecase.dart';
 
 /// 掼蛋游戏状态管理（StateNotifier）
 class GuandanGameNotifier extends StateNotifier<GuandanGameState> {

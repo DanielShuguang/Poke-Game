@@ -8,7 +8,7 @@ import 'package:poke_game/domain/guandan/entities/guandan_card.dart';
 import 'package:poke_game/domain/guandan/entities/guandan_game_state.dart';
 import 'package:poke_game/domain/guandan/entities/guandan_network_action.dart';
 import 'package:poke_game/domain/guandan/entities/guandan_player.dart';
-import 'package:poke_game/domain/guandan/guandan_game_notifier.dart';
+import 'package:poke_game/presentation/pages/guandan/providers/guandan_game_notifier.dart';
 import 'package:poke_game/domain/guandan/usecases/hint_usecase.dart';
 import 'package:poke_game/domain/guandan/usecases/validate_hand_usecase.dart';
 import 'package:poke_game/presentation/pages/guandan/widgets/guandan_hand_widget.dart';
