@@ -1,84 +1,63 @@
-import 'dart:async';
-
+import 'package:poke_game/core/network/game_network_adapter.dart';
 import 'package:poke_game/domain/doudizhu/entities/card.dart';
 import 'package:poke_game/domain/shengji/entities/shengji_card.dart';
 import 'package:poke_game/domain/shengji/entities/shengji_game_state.dart';
 import 'package:poke_game/domain/shengji/entities/shengji_network_action.dart';
-import 'package:poke_game/domain/shengji/notifiers/shengji_notifier.dart';
 import 'package:poke_game/domain/shengji/validators/call_validator.dart';
-
-abstract class _ShengjiMessageType {
-  static const action = 'shengji_action';
-  static const stateSync = 'shengji_state';
-}
+import 'package:poke_game/presentation/pages/shengji/providers/shengji_notifier.dart';
 
 /// 升级网络适配器
 ///
 /// Host：接收 Client 行动 → 验证 → 执行 → 广播新状态。
 /// Client：发送行动给 Host，接收状态广播更新本地 UI。
-class ShengjiNetworkAdapter {
-  final Stream<Map<String, dynamic>> incomingStream;
-  final void Function(Map<String, dynamic>) broadcastFn;
+class ShengjiNetworkAdapter extends GameNetworkAdapter {
   final ShengjiNotifier _notifier;
-  final bool isHost;
-  final String localPlayerId;
-
-  StreamSubscription? _sub;
-  Timer? _timeoutTimer;
-  String? _watchedPlayerId;
-
-  final int turnTimeLimit;
 
   ShengjiNetworkAdapter({
-    required this.incomingStream,
-    required this.broadcastFn,
+    required super.incomingStream,
+    required super.broadcastFn,
     required ShengjiNotifier notifier,
-    required this.isHost,
-    required this.localPlayerId,
-    this.turnTimeLimit = 35,
+    required super.isHost,
+    required super.localPlayerId,
+    super.turnTimeLimit = 35,
   }) : _notifier = notifier;
 
-  void start() {
-    _sub = incomingStream.listen(_handleMessage);
-    if (isHost) _resetTimeout();
+  @override
+  dynamic get notifier => _notifier;
+
+  @override
+  String get actionMessageType => 'shengji_action';
+
+  @override
+  String get stateMessageType => 'shengji_state';
+
+  @override
+  dynamic get currentState => _notifier.currentState;
+
+  @override
+  Map<String, dynamic> serializeState(dynamic state, {bool includeAllCards = false}) {
+    final s = state as ShengjiGameState;
+    final shouldIncludeAll = s.phase == ShengjiPhase.finished;
+    return s.toJson(includeAllCards: shouldIncludeAll, localPlayerId: localPlayerId);
   }
 
-  void stop() {
-    _sub?.cancel();
-    _sub = null;
-    _timeoutTimer?.cancel();
-    _timeoutTimer = null;
+  @override
+  dynamic deserializeAction(Map<String, dynamic> data) {
+    return ShengjiNetworkAction.fromJson(data);
   }
 
-  /// Client 发送行动
-  void sendAction(ShengjiNetworkAction action) {
-    broadcastFn({'type': _ShengjiMessageType.action, 'data': action.toJson()});
+  @override
+  bool shouldProcessAction(dynamic action, dynamic state) {
+    final networkAction = action as ShengjiNetworkAction;
+    final s = state as ShengjiGameState;
+    final currentPlayer = s.currentPlayer;
+    if (currentPlayer == null) return false;
+    return currentPlayer.id == networkAction.playerId;
   }
 
-  void _handleMessage(Map<String, dynamic> msg) {
-    try {
-      final type = msg['type'] as String?;
-      final data = msg['data'] as Map<String, dynamic>?;
-      if (data == null) return;
-      if (type == _ShengjiMessageType.action && isHost) {
-        _handleActionFromClient(data);
-      } else if (type == _ShengjiMessageType.stateSync && !isHost) {
-        _handleStateSyncFromHost(data);
-      }
-    } catch (_) {}
-  }
-
-  // ── Host 端 ───────────────────────────────────────────────────────────────
-
-  void _handleActionFromClient(Map<String, dynamic> data) {
-    final networkAction = ShengjiNetworkAction.fromJson(data);
-
-    // 验证：只处理当前玩家的行动
-    final currentPlayer = _notifier.currentState.currentPlayer;
-    if (currentPlayer == null || currentPlayer.id != networkAction.playerId) {
-      return;
-    }
-
+  @override
+  void executeAction(dynamic action) {
+    final networkAction = action as ShengjiNetworkAction;
     switch (networkAction.action) {
       case ShengjiActionType.callTrump:
         if (networkAction.callData != null) {
@@ -100,35 +79,68 @@ class ShengjiNetworkAdapter {
         }
         break;
     }
-
-    _broadcastState();
-    _resetTimeout();
   }
 
-  void _handleStateSyncFromHost(Map<String, dynamic> data) {
-    final newState = ShengjiGameState.fromJson(
-      data,
-      localPlayerId: localPlayerId,
-    );
+  @override
+  void applyNetworkState(Map<String, dynamic> data) {
+    final newState = ShengjiGameState.fromJson(data, localPlayerId: localPlayerId);
     _notifier.applyNetworkState(newState);
   }
 
-  /// 广播状态：finished 阶段包含全部手牌
-  void _broadcastState() {
-    final phase = _notifier.currentState.phase;
-    final includeAll = phase == ShengjiPhase.finished;
-    final json = _notifier.currentState.toJson(
-      includeAllCards: includeAll,
-      localPlayerId: localPlayerId,
-    );
-    broadcastFn({'type': _ShengjiMessageType.stateSync, 'data': json});
+  @override
+  bool includeAllCardsInState(dynamic state) {
+    final s = state as ShengjiGameState;
+    return s.phase == ShengjiPhase.finished;
   }
 
-  /// 解析叫牌内容
+  @override
+  bool shouldTrackTimeout(dynamic state) {
+    final s = state as ShengjiGameState;
+    return s.phase == ShengjiPhase.calling || s.phase == ShengjiPhase.playing;
+  }
+
+  @override
+  String? currentNonAiPlayerId(dynamic state) {
+    final s = state as ShengjiGameState;
+    final currentPlayer = s.currentPlayer;
+    if (currentPlayer == null || currentPlayer.isAi) return null;
+    return currentPlayer.id;
+  }
+
+  @override
+  void onTimeout(String playerId) {
+    final s = currentState as ShengjiGameState;
+    if (s.phase == ShengjiPhase.calling) {
+      _notifier.passCall(playerId);
+    } else {
+      _notifier.aiAutoAction(playerId);
+    }
+  }
+
+  /// Client 发送行动
+  void sendAction(ShengjiNetworkAction action) {
+    broadcastFn({'type': actionMessageType, 'data': action.toJson()});
+  }
+
+  /// 强制叫牌（超时托管用）
+  void forceCall(String playerId) {
+    if (!isHost) return;
+    _notifier.passCall(playerId);
+    doBroadcastState();
+    // Note: does NOT call _resetTimeout since this is a manual override
+  }
+
+  /// 强制出牌（超时托管用）
+  void forcePlay(String playerId) {
+    if (!isHost) return;
+    _notifier.aiAutoAction(playerId);
+    doBroadcastState();
+    // Note: does NOT call _resetTimeout since this is a manual override
+  }
+
   TrumpCall? _parseCall(Map<String, dynamic> data) {
     final typeName = data['type'] as String?;
     if (typeName == null) return null;
-
     try {
       final type = CallType.values.firstWhere((e) => e.name == typeName);
       switch (type) {
@@ -150,58 +162,5 @@ class ShengjiNetworkAdapter {
     } catch (_) {
       return null;
     }
-  }
-
-  /// 重置 35s 超时计时器
-  void _resetTimeout() {
-    _timeoutTimer?.cancel();
-
-    final phase = _notifier.currentState.phase;
-    if (phase != ShengjiPhase.calling && phase != ShengjiPhase.playing) {
-      return;
-    }
-
-    final currentPlayer = _notifier.currentState.currentPlayer;
-    if (currentPlayer == null || currentPlayer.isAi) return;
-
-    _watchedPlayerId = currentPlayer.id;
-
-    _timeoutTimer = Timer(Duration(seconds: turnTimeLimit), () {
-      final watched = _watchedPlayerId;
-      if (watched == null) return;
-
-      final player = _notifier.currentState.players
-          .where((p) => p.id == watched)
-          .firstOrNull;
-
-      if (player == null || player.isAi) return;
-
-      // 超时自动执行最小操作
-      if (phase == ShengjiPhase.calling) {
-        _notifier.passCall(watched);
-      } else {
-        // 出牌阶段会自动出最小牌
-        _notifier.aiAutoAction(watched);
-      }
-
-      _broadcastState();
-      _resetTimeout();
-    });
-  }
-
-  /// 强制叫牌（超时托管用）
-  void forceCall(String playerId) {
-    if (!isHost) return;
-    _notifier.passCall(playerId);
-    _broadcastState();
-    _resetTimeout();
-  }
-
-  /// 强制出牌（超时托管用）
-  void forcePlay(String playerId) {
-    if (!isHost) return;
-    _notifier.aiAutoAction(playerId);
-    _broadcastState();
-    _resetTimeout();
   }
 }

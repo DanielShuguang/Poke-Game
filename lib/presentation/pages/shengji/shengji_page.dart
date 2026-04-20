@@ -10,7 +10,7 @@ import 'package:poke_game/domain/shengji/entities/shengji_game_state.dart';
 import 'package:poke_game/domain/shengji/entities/shengji_network_action.dart';
 import 'package:poke_game/domain/shengji/entities/shengji_player.dart';
 import 'package:poke_game/domain/shengji/entities/shengji_team.dart';
-import 'package:poke_game/domain/shengji/notifiers/shengji_notifier.dart';
+import 'package:poke_game/presentation/pages/shengji/providers/shengji_notifier.dart';
 import 'package:poke_game/domain/shengji/validators/call_validator.dart';
 import 'package:poke_game/presentation/pages/shengji/widgets/call_trump_dialog.dart';
 import 'package:poke_game/presentation/pages/shengji/widgets/game_result_dialog.dart';
