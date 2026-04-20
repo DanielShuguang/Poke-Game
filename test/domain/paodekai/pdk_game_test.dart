@@ -3,7 +3,7 @@ import 'package:poke_game/domain/paodekai/entities/pdk_card.dart';
 import 'package:poke_game/domain/paodekai/entities/pdk_game_state.dart';
 import 'package:poke_game/domain/paodekai/entities/pdk_hand_type.dart';
 import 'package:poke_game/domain/paodekai/entities/pdk_player.dart';
-import 'package:poke_game/domain/paodekai/notifiers/pdk_notifier.dart';
+import 'package:poke_game/presentation/pages/paodekai/providers/pdk_notifier.dart';
 import 'package:poke_game/domain/paodekai/usecases/validate_play_usecase.dart';
 import 'package:poke_game/domain/paodekai/validators/card_validator.dart';
 import 'package:poke_game/domain/paodekai/validators/consecutive_validator.dart';
